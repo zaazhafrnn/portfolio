@@ -1,10 +1,10 @@
 "use client";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Download, Eye, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
@@ -208,7 +208,7 @@ export default function ResumeApp({
         }
       } catch (err) {
         setError(
-          "Resume not found. Please add resume.pdf to the public folder.",
+          "Unable to load Resume.",
         );
         setIsLoading(false);
       }
@@ -230,7 +230,7 @@ export default function ResumeApp({
           <div className="h-full flex items-center justify-center">
             <div className="text-center p-8">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Oops! Sorry, Resume Not Found
+                Oops! Sorry, Unable to load resume
               </h3>
             </div>
           </div>

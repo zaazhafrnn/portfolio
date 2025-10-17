@@ -1,14 +1,14 @@
 "use client";
+import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import {
-  MouseEvent as ReactMouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+    MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 export default function PhotosApp() {
   const [rotation, setRotation] = useState(-19.9);
@@ -131,7 +131,7 @@ export default function PhotosApp() {
           <div className="h-full flex items-center justify-center">
             <div className="text-center p-8">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Oops! Sorry, Photos Not Found
+                Oops! Sorry, Unable to load photos
               </h3>
             </div>
           </div>

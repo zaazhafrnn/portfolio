@@ -1,13 +1,17 @@
 "use client";
+import { Spinner } from "@/components/ui/spinner";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function SystemInfoApp() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const version = useMemo(() => {
     const birthDate = new Date(2007, 5, 18);
     const today = new Date();
@@ -29,6 +33,44 @@ export default function SystemInfoApp() {
 
     return `${years}.${months}.${days}`;
   }, []);
+
+  useEffect(() => {
+    const checkVideo = async () => {
+      try {
+        const response = await fetch("/photos/video-3.mp4", { method: "HEAD" });
+        if (response.ok) {
+          setIsLoading(false);
+        } else {
+          throw new Error("Video not found");
+        }
+      } catch (err) {
+        setError("Unable to load system information");
+        setIsLoading(false);
+      }
+    };
+
+    checkVideo();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-50 w-full h-full flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-neutral-50 w-full h-full flex items-center justify-center">
+        <div className="text-center p-8">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Oops! Sorry, Unable to load system information
+          </h3>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-neutral-50 w-full h-full flex flex-col">
