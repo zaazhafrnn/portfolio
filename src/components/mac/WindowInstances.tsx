@@ -1,16 +1,16 @@
 "use client";
 import Window from "@/components/ui/Window";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuTrigger,
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuLabel,
+    ContextMenuSeparator,
+    ContextMenuShortcut,
+    ContextMenuSub,
+    ContextMenuSubContent,
+    ContextMenuSubTrigger,
+    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { Download } from "lucide-react";
@@ -22,7 +22,7 @@ export default function WindowInstances({
   minimizeWindow,
   bringToFront,
   handleMouseDown,
-  stopBouncing,
+  stopBouncingForApp,
   getWindowContent,
   windowToolbarContent,
   WINDOW_SIZES,
@@ -34,7 +34,7 @@ export default function WindowInstances({
           <ContextMenu
             key={win.id}
             onOpenChange={(open) => {
-              if (open) stopBouncing(win.appId);
+              if (open) stopBouncingForApp(win.appId);
             }}
           >
             <ContextMenuTrigger>
@@ -44,18 +44,9 @@ export default function WindowInstances({
                 position={win.position}
                 zIndex={win.zIndex}
                 onClose={closeWindow}
-                onMinimize={() => {
-                  minimizeWindow(win.id);
-                  stopBouncing(win.appId);
-                }}
-                onMouseDown={(e) => {
-                  handleMouseDown(e, win.id);
-                  stopBouncing(win.appId);
-                }}
-                onBringToFront={() => {
-                  bringToFront(win.id);
-                  stopBouncing(win.appId);
-                }}
+                onMinimize={() => minimizeWindow(win.id)}
+                onMouseDown={(e) => handleMouseDown(e, win.id)}
+                onBringToFront={() => bringToFront(win.id)}
                 customToolbarLeft={windowToolbarContent[win.id]?.left}
                 customToolbarRight={windowToolbarContent[win.id]?.right}
                 width={WINDOW_SIZES[win.appId]?.width}
@@ -82,28 +73,15 @@ export default function WindowInstances({
                 {win.title}
               </ContextMenuLabel>
               <ContextMenuSeparator />
-              <ContextMenuItem
-                onSelect={() => {
-                  bringToFront(win.id);
-                  stopBouncing(win.appId);
-                }}
-              >
+              <ContextMenuItem onSelect={() => bringToFront(win.id)}>
                 Bring to Front
               </ContextMenuItem>
-              <ContextMenuItem
-                onSelect={() => {
-                  minimizeWindow(win.id);
-                  stopBouncing(win.appId);
-                }}
-              >
+              <ContextMenuItem onSelect={() => minimizeWindow(win.id)}>
                 Minimize Window
                 <ContextMenuShortcut>⌘M</ContextMenuShortcut>
               </ContextMenuItem>
               <ContextMenuItem
-                onSelect={() => {
-                  closeWindow(win.id);
-                  stopBouncing(win.appId);
-                }}
+                onSelect={() => closeWindow(win.id)}
                 className="text-red-600"
               >
                 Close Window

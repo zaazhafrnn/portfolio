@@ -1,10 +1,10 @@
 "use client";
 import {
-  ATMApp,
-  PhotosApp,
-  ResumeApp,
-  SafariLauncher,
-  SystemInfoApp,
+    ATMApp,
+    PhotosApp,
+    ResumeApp,
+    SafariLauncher,
+    SystemInfoApp,
 } from "@/components/apps";
 import DesktopBackground from "@/components/mac/DesktopBackground";
 import TopBar from "@/components/mac/TopBar";
@@ -75,6 +75,8 @@ function MacOSDesktop() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    bouncingApps,
+    stopBouncingForApp,
   } = useWindowManager();
 
   const [windowToolbarContent, setWindowToolbarContent] = useState<{
@@ -135,30 +137,19 @@ function MacOSDesktop() {
   };
 
   const openAppIds = windows.map((w) => w.appId);
-  const [bouncingApps, setBouncingApps] = useState<string[]>([]);
 
   const handleAppClick = (appId: string) => {
     const app = apps.find((a) => a.id === appId);
     if (!app) return;
-    const isAlreadyOpen = windows.some((w) => w.appId === appId);
     openWindow(app.id, app.name);
-    if (!isAlreadyOpen && !bouncingApps.includes(app.id)) {
-      setBouncingApps((prev) => [...prev, app.id]);
-    }
-  };
-
-  const stopBouncing = (appId: string) => {
-    setBouncingApps((prev) => prev.filter((id) => id !== appId));
   };
 
   const handleCloseAllWindows = () => {
     closeAllWindows();
-    setBouncingApps([]);
   };
 
   const minimizeAllWindows = () => {
     windows.forEach((w) => !w.isMinimized && minimizeWindow(w.id));
-    setBouncingApps([]);
   };
 
   return (
@@ -179,7 +170,7 @@ function MacOSDesktop() {
         minimizeWindow={minimizeWindow}
         handleMouseDown={handleMouseDown}
         bringToFront={bringToFront}
-        stopBouncing={stopBouncing}
+        stopBouncingForApp={stopBouncingForApp}
         getWindowContent={getWindowContent}
         windowToolbarContent={windowToolbarContent}
         WINDOW_SIZES={WINDOW_SIZES}
@@ -192,7 +183,7 @@ function MacOSDesktop() {
             onAppClick={handleAppClick}
             openApps={openAppIds}
             bouncingApps={bouncingApps}
-            stopBounce={stopBouncing}
+            stopBounce={stopBouncingForApp}
             windows={windows}
             closeApp={closeWindow}
             minimizeApp={minimizeWindow}

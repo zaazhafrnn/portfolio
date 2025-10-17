@@ -1,7 +1,6 @@
 "use client";
-
 import type { DragState, MouseEventHandler, WindowData } from "@/types";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 
 export const useWindowManager = () => {
   const [windows, setWindows] = useState<WindowData[]>([]);
@@ -15,13 +14,21 @@ export const useWindowManager = () => {
     return winList.map((w, i) => ({ ...w, zIndex: i + 1 }));
   };
 
+  const stopBouncingForApp = useCallback((appId: string) => {
+    setWindows((prev) =>
+      prev.map((w) =>
+        w.appId === appId ? { ...w, isBouncing: false } : w
+      )
+    );
+  }, []);
+
   const bringToFront = useCallback(
     (windowId: number) => {
       const target = windows.find((w) => w.id === windowId);
       if (!target) return;
 
       const others = windows.filter((w) => w.id !== windowId);
-      const reordered = [...others, target];
+      const reordered = [...others, { ...target, isBouncing: false }];
       setWindows(reindexWindows(reordered));
     },
     [windows],
@@ -30,22 +37,21 @@ export const useWindowManager = () => {
   const minimizeWindow = useCallback((windowId: number) => {
     setWindows((prev) =>
       prev.map((w) =>
-        w.id === windowId ? { ...w, isMinimized: !w.isMinimized } : w,
+        w.id === windowId
+          ? { ...w, isMinimized: !w.isMinimized, isBouncing: false } // Stop bouncing
+          : w
       ),
     );
   }, []);
 
   const openWindow = useCallback(
     (appId: string, title: string) => {
-      const isWindowOpen = windows.some((window) => window.appId === appId);
+      const existingWindow = windows.find((w) => w.appId === appId);
 
-      if (isWindowOpen) {
-        const existingWindow = windows.find((w) => w.appId === appId);
-        if (existingWindow) {
-          bringToFront(existingWindow.id);
-          if (existingWindow.isMinimized) {
-            minimizeWindow(existingWindow.id);
-          }
+      if (existingWindow) {
+        bringToFront(existingWindow.id);
+        if (existingWindow.isMinimized) {
+          minimizeWindow(existingWindow.id);
         }
         return;
       }
@@ -60,6 +66,7 @@ export const useWindowManager = () => {
         },
         size: { width: 600, height: 400 },
         isMinimized: false,
+        isBouncing: true,
         zIndex: 0,
       };
 
@@ -90,15 +97,16 @@ export const useWindowManager = () => {
           y: e.clientY - window.position.y,
         },
       });
+
+      stopBouncingForApp(window.appId);
       bringToFront(windowId);
     },
-    [windows, bringToFront],
+    [windows, bringToFront, stopBouncingForApp],
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<Element>) => {
       if (dragState.isDragging === false) return;
-
       const window = windows.find((w) => w.id === dragState.isDragging);
       if (!window) return;
 
@@ -109,7 +117,7 @@ export const useWindowManager = () => {
         prev.map((w) =>
           w.id === dragState.isDragging
             ? { ...w, position: { x: newX, y: newY } }
-            : w,
+            : w
         ),
       );
     },
@@ -124,6 +132,11 @@ export const useWindowManager = () => {
     setWindows([]);
   };
 
+  const bouncingApps = useMemo(
+    () => windows.filter((w) => w.isBouncing).map((w) => w.appId),
+    [windows]
+  );
+
   return {
     windows,
     openWindow,
@@ -134,5 +147,7 @@ export const useWindowManager = () => {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    bouncingApps,
+    stopBouncingForApp,
   };
 };

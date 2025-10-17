@@ -16,6 +16,7 @@ export interface WindowData {
   title: string;
   position: Position;
   size: Size;
+  isBouncing?: boolean;
   isMinimized: boolean;
   zIndex: number;
 }
