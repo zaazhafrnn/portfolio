@@ -400,7 +400,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
                       );
                       if (win && closeApp) closeApp(win.id);
                     }}
-                    className="text-red-500"
+                    className="text-red-600 hover:bg-red-50 focus:bg-red-100 focus:text-red-800"
                     disabled={
                       !windows.some((w: WindowData) => w.appId === app.id)
                     }

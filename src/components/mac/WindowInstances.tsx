@@ -96,7 +96,7 @@ export default function WindowInstances({
               </ContextMenuItem>
               <ContextMenuItem
                 onSelect={() => closeWindow(win.id)}
-                className="text-red-600"
+                className="text-red-600 hover:bg-red-50 focus:bg-red-100 focus:text-red-800"
               >
                 Close Window
                 <ContextMenuShortcut>⌘W</ContextMenuShortcut>

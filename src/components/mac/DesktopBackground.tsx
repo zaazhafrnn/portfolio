@@ -58,7 +58,7 @@ export default function DesktopBackground({
           inset
           onSelect={handleCloseAllWindows}
           disabled={windows.length === 0}
-          className="text-red-600"
+          className="text-red-600 hover:bg-red-50 focus:bg-red-100 focus:text-red-800"
         >
           Close All Window
           <ContextMenuShortcut>⌘⇧W</ContextMenuShortcut>
