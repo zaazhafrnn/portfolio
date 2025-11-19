@@ -1,14 +1,16 @@
-import { SVGProps } from "react";
+import { ReactNode, SVGProps } from "react";
 
 type SafariMode = "default" | "simple";
 
-export interface SafariProps extends SVGProps<SVGSVGElement> {
+export interface SafariProps
+  extends Omit<SVGProps<SVGSVGElement>, "width" | "height" | "children"> {
   url?: string;
   imageSrc?: string;
   videoSrc?: string;
   width?: number;
   height?: number;
   mode?: SafariMode;
+  children?: ReactNode;
 }
 
 export function Safari({
@@ -18,6 +20,7 @@ export function Safari({
   width = 1203,
   height = 753,
   mode = "default",
+  children,
   ...props
 }: SafariProps) {
   return (
@@ -159,6 +162,19 @@ export function Safari({
               muted
               playsInline
             />
+          </foreignObject>
+        )}
+        {children && (
+          <foreignObject
+            x="1"
+            y="52"
+            width={width - 2}
+            height={height - 52}
+            clipPath="url(#roundedBottom)"
+          >
+            <div className="size-full overflow-hidden bg-white dark:bg-black">
+              {children}
+            </div>
           </foreignObject>
         )}
       </g>
