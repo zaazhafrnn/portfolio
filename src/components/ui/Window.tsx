@@ -43,7 +43,7 @@ const TrafficLights: FC<{
     }`}
   >
     <TooltipProvider>
-      <Tooltip delayDuration={200}>
+      <Tooltip>
         <TooltipTrigger asChild>
           <button
             onClick={(e) => {
@@ -75,7 +75,7 @@ const TrafficLights: FC<{
     </TooltipProvider>
 
     <TooltipProvider>
-      <Tooltip delayDuration={200}>
+      <Tooltip>
         <TooltipTrigger asChild>
           <button
             onClick={(e) => {
