@@ -7,6 +7,11 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { WindowData } from "@/types";
 import Image from "next/image";
@@ -286,115 +291,125 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <div
-        className="relative"
-        style={{
-          height: `${baseIconSize}px`,
-          width: "100%",
-        }}
-      >
-        {apps.map((app, index) => {
-          const scale = currentScales[index];
-          const position = currentPositions[index] || 0;
-          const scaledSize = baseIconSize * scale;
+        <div
+          className="relative"
+          style={{
+            height: `${baseIconSize}px`,
+            width: "100%",
+          }}
+        >
+          {apps.map((app, index) => {
+            const scale = currentScales[index];
+            const position = currentPositions[index] || 0;
+            const scaledSize = baseIconSize * scale;
 
-          return (
-            <ContextMenu key={app.id}>
-              <ContextMenuTrigger asChild>
-                <div
-                  ref={(el) => {
-                    iconRefs.current[index] = el;
-                  }}
-                  className={cn(
-                    "absolute cursor-pointer flex flex-col items-center justify-end",
-                    bouncingApps.includes(app.id) && "animate-bounce",
-                  )}
-                  onClick={() => handleAppClick(app.id, index)}
-                  style={{
-                    left: `${position - scaledSize / 2}px`,
-                    bottom: "0px",
-                    width: `${scaledSize}px`,
-                    height: `${scaledSize}px`,
-                    transformOrigin: "bottom center",
-                    zIndex: Math.round(scale * 10),
-                  }}
-                >
-                  <Image
-                    src={app.icon}
-                    alt={app.name}
-                    width={scaledSize}
-                    height={scaledSize}
-                    className="object-contain"
-                    draggable={false}
-                    style={{
-                      filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.2 + (scale - 1) * 0.15}))`,
+            return (
+              <ContextMenu key={app.id}>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <ContextMenuTrigger asChild>
+                      <div
+                        ref={(el) => {
+                          iconRefs.current[index] = el;
+                        }}
+                        className={cn(
+                          "absolute cursor-pointer flex flex-col items-center justify-end",
+                          bouncingApps.includes(app.id) && "animate-bounce",
+                        )}
+                        onClick={() => handleAppClick(app.id, index)}
+                        style={{
+                          left: `${position - scaledSize / 2}px`,
+                          bottom: "0px",
+                          width: `${scaledSize}px`,
+                          height: `${scaledSize}px`,
+                          transformOrigin: "bottom center",
+                          zIndex: Math.round(scale * 10),
+                        }}
+                      >
+                        <Image
+                          src={app.icon}
+                          alt={app.name}
+                          width={scaledSize}
+                          height={scaledSize}
+                          className="object-contain"
+                          draggable={false}
+                          style={{
+                            filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.2 + (scale - 1) * 0.15}))`,
+                          }}
+                        />
+                        {openApps.includes(app.id) && (
+                          <div
+                            className="absolute"
+                            style={{
+                              bottom: `${Math.max(-2, -baseIconSize * 0.05)}px`,
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              width: `${Math.max(3, baseIconSize * 0.06)}px`,
+                              height: `${Math.max(3, baseIconSize * 0.06)}px`,
+                              borderRadius: "50%",
+                              backgroundColor: "rgba(0, 0, 0, 1)",
+                              boxShadow: "0 0 4px rgba(0, 0, 0, 0.3)",
+                            }}
+                          />
+                        )}
+                      </div>
+                    </ContextMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    sideOffset={Math.max(8, baseIconSize * 0.15)}
+                  >
+                    {app.name}
+                  </TooltipContent>
+                </Tooltip>
+
+                <ContextMenuContent className="w-44">
+                  <ContextMenuLabel className="text-xs text-center -mt-1 h-6 text-muted-foreground">
+                    {app.name}
+                  </ContextMenuLabel>
+                  <ContextMenuSeparator />
+
+                  <ContextMenuItem
+                    onSelect={() => {
+                      onAppClick(app.id);
                     }}
-                  />
-                  {openApps.includes(app.id) && (
-                    <div
-                      className="absolute"
-                      style={{
-                        bottom: `${Math.max(-2, -baseIconSize * 0.05)}px`,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: `${Math.max(3, baseIconSize * 0.06)}px`,
-                        height: `${Math.max(3, baseIconSize * 0.06)}px`,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(0, 0, 0, 1)",
-                        boxShadow: "0 0 4px rgba(0, 0, 0, 0.3)",
-                      }}
-                    />
-                  )}
-                </div>
-              </ContextMenuTrigger>
-
-              <ContextMenuContent className="w-44">
-                <ContextMenuLabel className="text-xs text-center -mt-1 h-6 text-muted-foreground">
-                  {app.name}
-                </ContextMenuLabel>
-                <ContextMenuSeparator />
-
-                <ContextMenuItem
-                  onSelect={() => {
-                    onAppClick(app.id);
-                  }}
-                >
-                  Open This Window
-                </ContextMenuItem>
-                <ContextMenuItem
-                  onSelect={() => {
-                    stopBounce?.(app.id);
-                    const win = windows.find(
-                      (w: WindowData) => w.appId === app.id && !w.isMinimized,
-                    );
-                    if (win && minimizeApp) minimizeApp(win.id);
-                  }}
-                  disabled={
-                    !windows.some(
-                      (w: WindowData) => w.appId === app.id && !w.isMinimized,
-                    )
-                  }
-                >
-                  Minimize Window
-                </ContextMenuItem>
-                <ContextMenuItem
-                  onSelect={() => {
-                    stopBounce?.(app.id);
-                    const win = windows.find(
-                      (w: WindowData) => w.appId === app.id,
-                    );
-                    if (win && closeApp) closeApp(win.id);
-                  }}
-                  className="text-red-500"
-                  disabled={
-                    !windows.some((w: WindowData) => w.appId === app.id)
-                  }
-                >
-                  Close This Window
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
-          );
+                  >
+                    Open This Window
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onSelect={() => {
+                      stopBounce?.(app.id);
+                      const win = windows.find(
+                        (w: WindowData) => w.appId === app.id && !w.isMinimized,
+                      );
+                      if (win && minimizeApp) minimizeApp(win.id);
+                    }}
+                    disabled={
+                      !windows.some(
+                        (w: WindowData) => w.appId === app.id && !w.isMinimized,
+                      )
+                    }
+                  >
+                    Minimize Window
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onSelect={() => {
+                      stopBounce?.(app.id);
+                      const win = windows.find(
+                        (w: WindowData) => w.appId === app.id,
+                      );
+                      if (win && closeApp) closeApp(win.id);
+                    }}
+                    className="text-red-500"
+                    disabled={
+                      !windows.some((w: WindowData) => w.appId === app.id)
+                    }
+                  >
+                    Close This Window
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
+            );
         })}
       </div>
     </div>
