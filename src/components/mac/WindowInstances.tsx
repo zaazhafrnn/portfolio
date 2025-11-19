@@ -27,6 +27,19 @@ export default function WindowInstances({
   windowToolbarContent,
   WINDOW_SIZES,
 }: any) {
+  const activeWindow = windows.reduce(
+    (current: any, win: any) => {
+      if (win.isMinimized) return current;
+      if (!current || win.zIndex > current.zIndex) {
+        return win;
+      }
+      return current;
+    },
+    null,
+  );
+
+  const activeWindowId = activeWindow?.id ?? null;
+
   return (
     <>
       {windows.map((win: any) =>
@@ -43,6 +56,7 @@ export default function WindowInstances({
                 title={win.title}
                 position={win.position}
                 zIndex={win.zIndex}
+                isFocused={win.id === activeWindowId}
                 onClose={closeWindow}
                 onMinimize={() => minimizeWindow(win.id)}
                 onMouseDown={(e) => handleMouseDown(e, win.id)}

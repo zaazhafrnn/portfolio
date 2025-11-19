@@ -14,6 +14,7 @@ interface WindowProps {
   title: string;
   position: Position;
   zIndex: number;
+  isFocused: boolean;
   onClose: (id: number) => void;
   onMinimize: (id: number) => void;
   onMouseDown: (e: React.MouseEvent<Element>, id: number) => void;
@@ -32,22 +33,33 @@ const DEFAULT_HEIGHT = 400;
 
 const TrafficLights: FC<{
   id: number;
+  isFocused: boolean;
   onClose: (id: number) => void;
   onMinimize: (id: number) => void;
-}> = ({ id, onClose, onMinimize }) => (
-  <div className="flex gap-1 group">
+}> = ({ id, isFocused, onClose, onMinimize }) => (
+  <div
+    className={`flex gap-1 group ${
+      isFocused ? "" : "opacity-60 pointer-events-none"
+    }`}
+  >
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onClose(id);
             }}
-            className="w-3 h-3 bg-red-500 rounded-full hover:bg-red-600 transition-colors flex items-center justify-center cursor-pointer"
+            className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer ${
+              isFocused 
+                ? "bg-red-500 hover:bg-red-600" 
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
           >
             <X
-              className="text-red-900 opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`text-red-900 transition-opacity duration-300 ${
+                isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
+              }`}
               size={8}
               strokeWidth={4}
             />
@@ -63,17 +75,23 @@ const TrafficLights: FC<{
     </TooltipProvider>
 
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
           <button
             onClick={(e) => {
               e.stopPropagation();
               onMinimize(id);
             }}
-            className="w-3 h-3 bg-yellow-500 rounded-full hover:bg-yellow-600 transition-colors flex items-center justify-center cursor-pointer"
+            className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer ${
+              isFocused 
+                ? "bg-yellow-500 hover:bg-yellow-600" 
+                : "bg-gray-300 hover:bg-gray-400"
+            }`}
           >
             <Minus
-              className="text-yellow-900 opacity-0 group-hover:opacity-100 transition-opacity"
+              className={`text-yellow-900 transition-opacity duration-300 ${
+                isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
+              }`}
               size={8}
               strokeWidth={4}
             />
@@ -97,6 +115,7 @@ const Window: FC<WindowProps> = ({
   title,
   position,
   zIndex,
+  isFocused,
   onClose,
   onMinimize,
   onMouseDown,
@@ -133,6 +152,7 @@ const Window: FC<WindowProps> = ({
             {showDefaultButtons && (
               <TrafficLights
                 id={id}
+                isFocused={isFocused}
                 onClose={onClose}
                 onMinimize={onMinimize}
               />
@@ -158,7 +178,12 @@ const Window: FC<WindowProps> = ({
           onMouseDown={(e) => onMouseDown(e, id)}
         >
           {showDefaultButtons && (
-            <TrafficLights id={id} onClose={onClose} onMinimize={onMinimize} />
+            <TrafficLights
+              id={id}
+              isFocused={isFocused}
+              onClose={onClose}
+              onMinimize={onMinimize}
+            />
           )}
           {/* no title, no customToolbar */}
         </div>
