@@ -122,7 +122,7 @@ export default function SystemInfoApp() {
                   side="right"
                   className="px-2 py-1 text-white text-xs rounded"
                 >
-                  MAMAA MAU INII! 🥺
+                  i wish.
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
