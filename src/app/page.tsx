@@ -43,6 +43,7 @@ const WINDOW_SIZES: Record<string, { width: number; height: number }> = {
   systemInfo: { width: 660, height: 368 },
   atmProject: { width: 600, height: 500 },
   mBankingProject: { width: 750, height: 470 },
+  safari: { width: 880, height: 570}
 };
 
 export default function MacOSDesktopWrapper() {
