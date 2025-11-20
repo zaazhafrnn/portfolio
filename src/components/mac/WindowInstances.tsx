@@ -1,16 +1,16 @@
 "use client";
 import Window from "@/components/ui/Window";
 import {
-    ContextMenu,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuLabel,
-    ContextMenuSeparator,
-    ContextMenuShortcut,
-    ContextMenuSub,
-    ContextMenuSubContent,
-    ContextMenuSubTrigger,
-    ContextMenuTrigger,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { Download } from "lucide-react";
@@ -66,7 +66,7 @@ export default function WindowInstances({
                 width={WINDOW_SIZES[win.appId]?.width}
                 height={WINDOW_SIZES[win.appId]?.height}
                 toolbarVariant={
-                  win.appId === "mBankingProject" ? "transparent" : "default"
+                  win.appId === "safari" ? "transparent" : "default"
                 }
               >
                 <Suspense

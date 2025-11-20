@@ -1,10 +1,10 @@
 "use client";
 import {
-    ATMApp,
-    PhotosApp,
-    ResumeApp,
-    SafariLauncher,
-    SystemInfoApp,
+  ATMApp,
+  PhotosApp,
+  ResumeApp,
+  SafariLauncher,
+  SystemInfoApp,
 } from "@/components/apps";
 import DesktopBackground from "@/components/mac/DesktopBackground";
 import TopBar from "@/components/mac/TopBar";
@@ -25,8 +25,8 @@ const apps = [
   { id: "resume", name: "Resume.pdf", icon: "/icons/docs.png" },
   { id: "systemInfo", name: "System Information", icon: "/icons/settings.png" },
   {
-    id: "mBankingProject",
-    name: "Portfolio (Mobile Banking)",
+    id: "safari",
+    name: "Safari",
     icon: "/icons/safari.png",
   },
   {
@@ -123,7 +123,7 @@ function MacOSDesktop() {
         );
       case "systemInfo":
         return <SystemInfoApp />;
-      case "mBankingProject":
+      case "safari":
         return <SafariLauncher />;
       case "atmProject":
         return <ATMApp />;
