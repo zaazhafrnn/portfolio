@@ -12,7 +12,7 @@ import WindowInstances from "@/components/mac/WindowInstances";
 import SplashScreen from "@/components/ui/SplashScreen";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const MacOSDock = dynamic(
   () => import("@/components/ui/mac-os-dock").then((mod) => mod.MacOSDock),
@@ -43,7 +43,7 @@ const WINDOW_SIZES: Record<string, { width: number; height: number }> = {
   systemInfo: { width: 660, height: 368 },
   atmProject: { width: 600, height: 500 },
   mBankingProject: { width: 750, height: 470 },
-  safari: { width: 880, height: 570}
+  safari: { width: 880, height: 570 }
 };
 
 export default function MacOSDesktopWrapper() {
@@ -87,7 +87,7 @@ function MacOSDesktop() {
     };
   }>({});
 
-  const handleToolbarLeftChange = (
+  const handleToolbarLeftChange = React.useCallback((
     windowId: number,
     content: React.ReactNode,
   ) => {
@@ -95,9 +95,9 @@ function MacOSDesktop() {
       ...prev,
       [windowId]: { ...prev[windowId], left: content },
     }));
-  };
+  }, []);
 
-  const handleToolbarRightChange = (
+  const handleToolbarRightChange = React.useCallback((
     windowId: number,
     content: React.ReactNode,
   ) => {
@@ -105,9 +105,15 @@ function MacOSDesktop() {
       ...prev,
       [windowId]: { ...prev[windowId], right: content },
     }));
-  };
+  }, []);
 
-  const getWindowContent = (appId: string, windowId: number) => {
+  const createToolbarCallback = useCallback((windowId: number) => {
+    return (content: React.ReactNode) => {
+      handleToolbarLeftChange(windowId, content);
+    };
+  }, [handleToolbarLeftChange]);
+
+  const getWindowContent = useCallback((appId: string, windowId: number) => {
     switch (appId) {
       case "photos":
         return <PhotosApp />;
@@ -125,7 +131,11 @@ function MacOSDesktop() {
       case "systemInfo":
         return <SystemInfoApp />;
       case "safari":
-        return <SafariLauncher />;
+        return (
+          <SafariLauncher
+            onToolbarLeftChange={createToolbarCallback(windowId)}
+          />
+        );
       case "atmProject":
         return <ATMApp />;
       default:
@@ -135,7 +145,7 @@ function MacOSDesktop() {
           </div>
         );
     }
-  };
+  }, [handleToolbarLeftChange, handleToolbarRightChange, createToolbarCallback]);
 
   const openAppIds = windows.map((w) => w.appId);
 

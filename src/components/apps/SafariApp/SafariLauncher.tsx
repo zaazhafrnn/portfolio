@@ -1,17 +1,151 @@
 "use client";
 import { Safari } from "@/components/ui/safari";
 import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import SafariApp, {
   SAFARI_PROJECTS,
   SafariProjectKey,
 } from "./index";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const SafariLauncher: React.FC = () => {
-  const [selectedProject, setSelectedProject] =
-    React.useState<SafariProjectKey | null>(null);
+interface SafariLauncherProps {
+  onToolbarLeftChange?: (content: React.ReactNode) => void;
+}
+
+const SafariLauncher: React.FC<SafariLauncherProps> = ({
+  onToolbarLeftChange,
+}) => {
+  const [history, setHistory] = React.useState<Array<SafariProjectKey | null>>([null]);
+  const [historyIndex, setHistoryIndex] = React.useState(0);
+
+  const selectedProject = history[historyIndex];
+
+  const navigateToProject = (project: SafariProjectKey | null) => {
+    setHistory((prev) => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      return [...newHistory, project];
+    });
+    setHistoryIndex((prev) => prev + 1);
+  };
+
+  const handleBack = useCallback(() => {
+    setHistoryIndex((prev) => {
+      if (prev > 0) {
+        return prev - 1;
+      }
+      return prev;
+    });
+  }, []);
+
+  const handleForward = useCallback(() => {
+    setHistoryIndex((prev) => {
+      if (prev < history.length - 1) {
+        return prev + 1;
+      }
+      return prev;
+    });
+  }, [history.length]);
+
+  const canGoBack = historyIndex > 0;
+  const canGoForward = historyIndex < history.length - 1;
+
+  const prevCanGoBackRef = React.useRef(canGoBack);
+  const prevCanGoForwardRef = React.useRef(canGoForward);
+  const onToolbarLeftChangeRef = React.useRef(onToolbarLeftChange);
+  const isInitialMountRef = React.useRef(true);
+
+  onToolbarLeftChangeRef.current = onToolbarLeftChange;
+
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      if (onToolbarLeftChangeRef.current) {
+        const toolbarContent = (
+          <div className="flex items-center gap-1 ml-8">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setHistoryIndex((prev) => (prev > 0 ? prev - 1 : prev));
+              }}
+              disabled={!canGoBack}
+              className={`p-1.5 rounded transition-colors ${canGoBack
+                ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
+                : "text-gray-400 cursor-not-allowed opacity-50"
+                }`}
+              aria-label="Go back"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setHistoryIndex((prev) => (prev < history.length - 1 ? prev + 1 : prev));
+              }}
+              disabled={!canGoForward}
+              className={`p-1.5 rounded transition-colors ${canGoForward
+                ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
+                : "text-gray-400 cursor-not-allowed opacity-50"
+                }`}
+              aria-label="Go forward"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        );
+        onToolbarLeftChangeRef.current(toolbarContent);
+      }
+      return;
+    }
+
+    if (
+      prevCanGoBackRef.current === canGoBack &&
+      prevCanGoForwardRef.current === canGoForward
+    ) {
+      return;
+    }
+
+    prevCanGoBackRef.current = canGoBack;
+    prevCanGoForwardRef.current = canGoForward;
+
+    if (!onToolbarLeftChangeRef.current) return;
+
+    const toolbarContent = (
+      <div className="flex items-center gap-1 ml-8">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setHistoryIndex((prev) => (prev > 0 ? prev - 1 : prev));
+          }}
+          disabled={!canGoBack}
+          className={`p-1.5 rounded transition-colors ${canGoBack
+            ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
+            : "text-gray-400 cursor-not-allowed opacity-50"
+            }`}
+          aria-label="Go back"
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setHistoryIndex((prev) => (prev < history.length - 1 ? prev + 1 : prev));
+          }}
+          disabled={!canGoForward}
+          className={`p-1.5 rounded transition-colors ${canGoForward
+            ? "text-gray-700 hover:bg-gray-200 cursor-pointer"
+            : "text-gray-400 cursor-not-allowed opacity-50"
+            }`}
+          aria-label="Go forward"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    );
+
+    onToolbarLeftChangeRef.current(toolbarContent);
+  }, [canGoBack, canGoForward, history.length]);
 
   const getUrl = () => {
     if (selectedProject) {
@@ -22,7 +156,14 @@ const SafariLauncher: React.FC = () => {
 
   return (
     <div className="relative h-full w-full -mt-2.5">
-      <Safari url={getUrl()} className="size-full">
+      <Safari
+        url={getUrl()}
+        className="size-full"
+        onBack={handleBack}
+        onForward={handleForward}
+        canGoBack={canGoBack}
+        canGoForward={canGoForward}
+      >
         <AnimatePresence mode="wait">
           {selectedProject ? (
             <motion.div
@@ -35,7 +176,7 @@ const SafariLauncher: React.FC = () => {
             >
               <SafariApp
                 project={selectedProject}
-                onBack={() => setSelectedProject(null)}
+                onBack={() => navigateToProject(null)}
               />
             </motion.div>
           ) : (
@@ -85,7 +226,7 @@ const SafariLauncher: React.FC = () => {
                         whileTap={disabled ? undefined : { scale: 0.98 }}
                         onClick={() => {
                           if (!disabled) {
-                            setSelectedProject(key);
+                            navigateToProject(key);
                           }
                         }}
                         className={[

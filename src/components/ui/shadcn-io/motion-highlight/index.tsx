@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { AnimatePresence, Transition, motion } from 'motion/react';
+import { useEffect } from 'react';
+import { useCallback } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -68,11 +70,11 @@ type ParentModeMotionHighlightProps = {
 
 type ControlledParentModeMotionHighlightProps<T extends string> =
   BaseMotionHighlightProps<T> &
-    ParentModeMotionHighlightProps & {
-      mode: 'parent';
-      controlledItems: true;
-      children: React.ReactNode;
-    };
+  ParentModeMotionHighlightProps & {
+    mode: 'parent';
+    controlledItems: true;
+    children: React.ReactNode;
+  };
 
 type ControlledChildrenModeMotionHighlightProps<T extends string> =
   BaseMotionHighlightProps<T> & {
@@ -83,12 +85,12 @@ type ControlledChildrenModeMotionHighlightProps<T extends string> =
 
 type UncontrolledParentModeMotionHighlightProps<T extends string> =
   BaseMotionHighlightProps<T> &
-    ParentModeMotionHighlightProps & {
-      mode: 'parent';
-      controlledItems?: false;
-      itemsClassName?: string;
-      children: React.ReactElement | React.ReactElement[];
-    };
+  ParentModeMotionHighlightProps & {
+    mode: 'parent';
+    controlledItems?: false;
+    itemsClassName?: string;
+    children: React.ReactElement | React.ReactElement[];
+  };
 
 type UncontrolledChildrenModeMotionHighlightProps<T extends string> =
   BaseMotionHighlightProps<T> & {
@@ -183,14 +185,14 @@ function MotionHighlight<T extends string>({
     setBoundsState((prev) => (prev === null ? prev : null));
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (value !== undefined) setActiveValue(value);
     else if (defaultValue !== undefined) setActiveValue(defaultValue);
   }, [value, defaultValue]);
 
   const id = React.useId();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'parent') return;
     const container = localRef.current;
     if (!container) return;
@@ -207,7 +209,7 @@ function MotionHighlight<T extends string>({
     return () => container.removeEventListener('scroll', onScroll);
   }, [mode, activeValue, safeSetBounds]);
 
-  const render = React.useCallback(
+  const render = useCallback(
     (children: React.ReactNode) => {
       if (mode === 'parent') {
         return (
@@ -296,15 +298,15 @@ function MotionHighlight<T extends string>({
         ? controlledItems
           ? render(children)
           : render(
-              React.Children.map(children, (child, index) => (
-                <MotionHighlightItem
-                  key={index}
-                  className={props?.itemsClassName}
-                >
-                  {child}
-                </MotionHighlightItem>
-              )),
-            )
+            React.Children.map(children, (child, index) => (
+              <MotionHighlightItem
+                key={index}
+                className={props?.itemsClassName}
+              >
+                {child}
+              </MotionHighlightItem>
+            )),
+          )
         : children}
     </MotionHighlightContext.Provider>
   );
@@ -390,7 +392,7 @@ function MotionHighlightItem({
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => localRef.current as HTMLDivElement);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (mode !== 'parent') return;
     let rafId: number;
     let previousBounds: Bounds | null = null;
@@ -451,21 +453,21 @@ function MotionHighlightItem({
 
   const commonHandlers = hover
     ? {
-        onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
-          setActiveValue(childValue);
-          element.props.onMouseEnter?.(e);
-        },
-        onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
-          setActiveValue(null);
-          element.props.onMouseLeave?.(e);
-        },
-      }
+      onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+        setActiveValue(childValue);
+        element.props.onMouseEnter?.(e);
+      },
+      onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+        setActiveValue(null);
+        element.props.onMouseLeave?.(e);
+      },
+    }
     : {
-        onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-          setActiveValue(childValue);
-          element.props.onClick?.(e);
-        },
-      };
+      onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+        setActiveValue(childValue);
+        element.props.onClick?.(e);
+      },
+    };
 
   if (asChild) {
     if (mode === 'children') {

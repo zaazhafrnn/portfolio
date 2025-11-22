@@ -11,6 +11,10 @@ export interface SafariProps
   height?: number;
   mode?: SafariMode;
   children?: ReactNode;
+  onBack?: () => void;
+  onForward?: () => void;
+  canGoBack?: boolean;
+  canGoForward?: boolean;
 }
 
 export function Safari({
@@ -21,6 +25,10 @@ export function Safari({
   height = 753,
   mode = "default",
   children,
+  onBack,
+  onForward,
+  canGoBack = false,
+  canGoForward = false,
   ...props
 }: SafariProps) {
   return (
@@ -108,18 +116,21 @@ export function Safari({
                 fill="#A3A3A3"
               />
             </g>*/}
-            <g className="mix-blend-luminosity">
+            {/* navigation arrow */}
+            {/* <g className="mix-blend-luminosity">
               <path
                 d="M143.914 32.5938C144.094 32.7656 144.312 32.8594 144.562 32.8594C145.086 32.8594 145.492 32.4531 145.492 31.9375C145.492 31.6797 145.391 31.4453 145.211 31.2656L139.742 25.9219L145.211 20.5938C145.391 20.4141 145.492 20.1719 145.492 19.9219C145.492 19.4062 145.086 19 144.562 19C144.312 19 144.094 19.0938 143.922 19.2656L137.844 25.2031C137.625 25.4062 137.516 25.6562 137.516 25.9297C137.516 26.2031 137.625 26.4375 137.836 26.6484L143.914 32.5938Z"
-                fill="#A3A3A3"
+                fill={canGoBack ? "#1a1a1a" : "#A3A3A3"}
+                className="transition-colors"
               />
             </g>
             <g className="mix-blend-luminosity">
               <path
                 d="M168.422 32.8594C168.68 32.8594 168.891 32.7656 169.07 32.5938L175.148 26.6562C175.359 26.4375 175.469 26.2109 175.469 25.9297C175.469 25.6562 175.367 25.4141 175.148 25.2109L169.07 19.2656C168.891 19.0938 168.68 19 168.422 19C167.898 19 167.492 19.4062 167.492 19.9219C167.492 20.1719 167.602 20.4141 167.773 20.5938L173.25 25.9375L167.773 31.2656C167.594 31.4531 167.492 31.6797 167.492 31.9375C167.492 32.4531 167.898 32.8594 168.422 32.8594Z"
-                fill="#A3A3A3"
+                fill={canGoForward ? "#1a1a1a" : "#A3A3A3"}
+                className="transition-colors"
               />
-            </g>
+            </g> */}
           </>
         ) : null}
         {/* Default background when no image/video */}
