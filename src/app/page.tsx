@@ -6,13 +6,14 @@ import {
   SafariLauncher,
   SystemInfoApp,
 } from "@/components/apps";
+import { useSafariStore } from "@/stores/safariStore";
 import DesktopBackground from "@/components/mac/DesktopBackground";
 import TopBar from "@/components/mac/TopBar";
 import WindowInstances from "@/components/mac/WindowInstances";
 import SplashScreen from "@/components/ui/SplashScreen";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import dynamic from "next/dynamic";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const MacOSDock = dynamic(
   () => import("@/components/ui/mac-os-dock").then((mod) => mod.MacOSDock),
@@ -87,7 +88,13 @@ function MacOSDesktop() {
     };
   }>({});
 
-  const handleToolbarLeftChange = React.useCallback((
+  const cleanupSafariStates = useSafariStore((state) => state.cleanupClosedWindows);
+  useEffect(() => {
+    const openWindowIds = windows.map((w) => w.id);
+    cleanupSafariStates(openWindowIds);
+  }, [windows, cleanupSafariStates]);
+
+  const handleToolbarLeftChange = useCallback((
     windowId: number,
     content: React.ReactNode,
   ) => {
@@ -97,7 +104,7 @@ function MacOSDesktop() {
     }));
   }, []);
 
-  const handleToolbarRightChange = React.useCallback((
+  const handleToolbarRightChange = useCallback((
     windowId: number,
     content: React.ReactNode,
   ) => {
@@ -133,6 +140,7 @@ function MacOSDesktop() {
       case "safari":
         return (
           <SafariLauncher
+            windowId={windowId}
             onToolbarLeftChange={createToolbarCallback(windowId)}
           />
         );

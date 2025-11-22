@@ -1,7 +1,7 @@
 "use client";
 import { Safari } from "@/components/ui/safari";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import SafariApp, {
   SAFARI_PROJECTS,
   SafariProjectKey,
@@ -9,16 +9,63 @@ import SafariApp, {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSafariStore } from "@/stores/safariStore";
 
 interface SafariLauncherProps {
+  windowId: number;
   onToolbarLeftChange?: (content: React.ReactNode) => void;
 }
 
 const SafariLauncher: React.FC<SafariLauncherProps> = ({
+  windowId,
   onToolbarLeftChange,
 }) => {
-  const [history, setHistory] = React.useState<Array<SafariProjectKey | null>>([null]);
-  const [historyIndex, setHistoryIndex] = React.useState(0);
+  const storeState = useSafariStore((state) => state.states[windowId]);
+  const setStoreState = useSafariStore((state) => state.setState);
+
+  const [history, setHistory] = useState<Array<SafariProjectKey | null>>(
+    storeState?.history ?? [null]
+  );
+  const [historyIndex, setHistoryIndex] = useState(storeState?.historyIndex ?? 0);
+
+  const isSyncingFromStoreRef = useRef(false);
+  const lastLocalStateRef = useRef({ history, historyIndex });
+
+  useEffect(() => {
+    if (!storeState) return;
+
+    const historyChanged = JSON.stringify(history) !== JSON.stringify(storeState.history);
+    const indexChanged = historyIndex !== storeState.historyIndex;
+
+    if (historyChanged || indexChanged) {
+      isSyncingFromStoreRef.current = true;
+      setHistory(storeState.history);
+      setHistoryIndex(storeState.historyIndex);
+      lastLocalStateRef.current = {
+        history: storeState.history,
+        historyIndex: storeState.historyIndex,
+      };
+      requestAnimationFrame(() => {
+        isSyncingFromStoreRef.current = false;
+      });
+    }
+  }, [windowId, storeState]);
+
+  useEffect(() => {
+    if (isSyncingFromStoreRef.current) return;
+
+    const currentState = { history, historyIndex };
+    const lastState = lastLocalStateRef.current;
+
+    const stateChanged =
+      JSON.stringify(lastState.history) !== JSON.stringify(currentState.history) ||
+      lastState.historyIndex !== currentState.historyIndex;
+
+    if (stateChanged) {
+      lastLocalStateRef.current = currentState;
+      setStoreState(windowId, currentState);
+    }
+  }, [windowId, history, historyIndex, setStoreState]);
 
   const selectedProject = history[historyIndex];
 
@@ -51,10 +98,10 @@ const SafariLauncher: React.FC<SafariLauncherProps> = ({
   const canGoBack = historyIndex > 0;
   const canGoForward = historyIndex < history.length - 1;
 
-  const prevCanGoBackRef = React.useRef(canGoBack);
-  const prevCanGoForwardRef = React.useRef(canGoForward);
-  const onToolbarLeftChangeRef = React.useRef(onToolbarLeftChange);
-  const isInitialMountRef = React.useRef(true);
+  const prevCanGoBackRef = useRef(canGoBack);
+  const prevCanGoForwardRef = useRef(canGoForward);
+  const onToolbarLeftChangeRef = useRef(onToolbarLeftChange);
+  const isInitialMountRef = useRef(true);
 
   onToolbarLeftChangeRef.current = onToolbarLeftChange;
 
