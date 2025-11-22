@@ -73,6 +73,7 @@ function MacOSDesktop() {
     closeWindow,
     minimizeWindow,
     closeAllWindows,
+    reloadWindow: reloadWindowFromManager,
     bringToFront,
     handleMouseDown,
     handleMouseMove,
@@ -171,6 +172,20 @@ function MacOSDesktop() {
     windows.forEach((w) => !w.isMinimized && minimizeWindow(w.id));
   };
 
+  const reloadWindow = useCallback((windowId: number) => {
+    const window = windows.find((w) => w.id === windowId);
+    if (!window) return;
+
+    const { appId, title } = window;
+
+    if (appId === "safari") {
+      const clearSafariState = useSafariStore.getState().clearState;
+      clearSafariState(windowId);
+    }
+
+    reloadWindowFromManager(windowId, appId, title);
+  }, [windows, reloadWindowFromManager]);
+
   return (
     <div
       className="h-screen w-screen bg-gray-50 relative overflow-hidden select-none"
@@ -193,6 +208,7 @@ function MacOSDesktop() {
         getWindowContent={getWindowContent}
         windowToolbarContent={windowToolbarContent}
         WINDOW_SIZES={WINDOW_SIZES}
+        reloadWindow={reloadWindow}
       />
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50">

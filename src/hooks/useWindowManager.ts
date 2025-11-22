@@ -132,6 +132,32 @@ export const useWindowManager = () => {
     setWindows([]);
   };
 
+  const reloadWindow = useCallback(
+    (windowId: number, appId: string, title: string) => {
+      const updated = windows.filter((w) => w.id !== windowId);
+      const remainingWindows = reindexWindows(updated);
+
+      const newWindow: WindowData = {
+        id: nextWindowId,
+        appId,
+        title,
+        position: {
+          x: 100 + remainingWindows.length * 30,
+          y: 100 + remainingWindows.length * 30,
+        },
+        size: { width: 600, height: 400 },
+        isMinimized: false,
+        isBouncing: true,
+        zIndex: 0,
+      };
+
+      const finalWindows = [...remainingWindows, newWindow];
+      setWindows(reindexWindows(finalWindows));
+      setNextWindowId((prev) => prev + 1);
+    },
+    [windows, nextWindowId],
+  );
+
   const bouncingApps = useMemo(
     () => windows.filter((w) => w.isBouncing).map((w) => w.appId),
     [windows]
@@ -143,6 +169,7 @@ export const useWindowManager = () => {
     closeWindow,
     minimizeWindow,
     closeAllWindows,
+    reloadWindow,
     bringToFront,
     handleMouseDown,
     handleMouseMove,

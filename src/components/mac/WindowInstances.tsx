@@ -26,6 +26,7 @@ export default function WindowInstances({
   getWindowContent,
   windowToolbarContent,
   WINDOW_SIZES,
+  reloadWindow,
 }: any) {
   const activeWindow = windows.reduce(
     (current: any, win: any) => {
@@ -278,7 +279,7 @@ export default function WindowInstances({
                   </ContextMenuSub>
                 </>
               )}
-              <ContextMenuItem>
+              <ContextMenuItem onSelect={() => reloadWindow?.(win.id)}>
                 Reload Window
                 <ContextMenuShortcut>⌘R</ContextMenuShortcut>
               </ContextMenuItem>
