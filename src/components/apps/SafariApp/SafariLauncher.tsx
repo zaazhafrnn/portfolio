@@ -45,10 +45,10 @@ const SafariLauncher: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="flex h-[100%] flex-col bg-[#f5f5f7] text-[#0d0d0d] dark:bg-[#050505] dark:text-white"
+              className="flex h-[100%] flex-col bg-[#f5f5f7] text-[#0d0d0d]"
             >
-              <header className="border-b border-black/5 bg-white/70 p-6 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
-                <p className="text-sm uppercase tracking-[0.4em] text-black/50 dark:text-white/50">
+              <header className="border-b border-black/5 bg-white/70 p-6 backdrop-blur-md">
+                <p className="text-sm uppercase tracking-[0.4em] text-black/50">
                   Featured work
                 </p>
                 <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
@@ -56,7 +56,7 @@ const SafariLauncher: React.FC = () => {
                     <h1 className="text-3xl font-semibold sm:text-4xl">
                       Choose a project to dive into
                     </h1>
-                    <p className="mt-2 max-w-3xl text-base text-black/60 dark:text-white/60">
+                    <p className="mt-2 max-w-3xl text-base text-black/60">
                       This Safari window contains demo projects. Click a card
                       to immerse into the project. Integrated with GitHub and live preview.
                     </p>
@@ -89,31 +89,31 @@ const SafariLauncher: React.FC = () => {
                           }
                         }}
                         className={[
-                          "group flex h-full flex-col rounded-3xl border border-black/5 bg-white/90 p-6 text-left shadow-lg ring-1 ring-black/5 transition dark:border-white/5 dark:bg-white/5 dark:ring-white/5",
-                          disabled ? "opacity-60 cursor-not-allowed" : "hover:ring-black/10 dark:hover:ring-white/20",
+                          "group flex h-full flex-col rounded-3xl border border-black/5 bg-white/90 p-6 text-left shadow-lg ring-1 ring-black/5 transition",
+                          disabled ? "opacity-60 cursor-not-allowed" : "hover:ring-black/10",
                         ].join(" ")}
                       >
-                        <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-black/50 dark:text-white/50">
+                        <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-black/50">
                           <span>{meta.subtitle}</span>
                           <span
                             className={`rounded-full px-3 py-1 text-[10px] tracking-tight ${disabled
-                              ? "bg-black/5 text-black/60 dark:bg-white/10 dark:text-white/60"
-                              : "bg-black text-white dark:bg-white dark:text-black"
+                              ? "bg-black/5 text-black/60"
+                              : "bg-black text-white"
                               }`}
                           >
                             {disabled ? "Soon" : "Demo"}
                           </span>
                         </div>
-                        <h3 className="mt-5 text-2xl font-semibold text-black dark:text-white">
+                        <h3 className="mt-5 text-2xl font-semibold text-black">
                           {meta.name}
                         </h3>
-                        <p className="mt-3 text-sm text-black/60 dark:text-white/70">
+                        <p className="mt-3 text-sm text-black/60">
                           {meta.summary}
                         </p>
                         <div className="mt-6 flex flex-1 items-end justify-between pt-4 text-sm">
-                          <div className="flex flex-col text-xs text-black/50 dark:text-white/60">
+                          <div className="flex flex-col text-xs text-black/50">
                             <span>GitHub Repository</span>
-                            <span className="font-medium text-black/80 dark:text-white/80">
+                            <span className="font-medium text-black/80">
                               {meta.url.replace("https://", "")}
                             </span>
                           </div>
@@ -121,8 +121,8 @@ const SafariLauncher: React.FC = () => {
                             className={[
                               "rounded-full px-4 py-2 text-sm font-medium transition",
                               disabled
-                                ? "bg-black/5 text-black/60 dark:bg-white/10 dark:text-white/60"
-                                : "bg-black text-white group-hover:bg-black/90 dark:bg-white dark:text-black dark:group-hover:bg-white/90",
+                                ? "bg-black/5 text-black/60"
+                                : "bg-black text-white group-hover:bg-black/90",
                             ].join(" ")}
                           >
                             {disabled ? "Stay tuned" : "Immerse"}
