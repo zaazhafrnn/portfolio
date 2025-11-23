@@ -2,16 +2,16 @@
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import {
-    MouseEvent as ReactMouseEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 
 export default function PhotosApp() {
-  const [rotation, setRotation] = useState(-19.9);
+  const [rotation, setRotation] = useState(-16);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentRotation, setCurrentRotation] = useState(0);
@@ -26,9 +26,12 @@ export default function PhotosApp() {
       { type: "video", src: "/photos/video-1.mp4" },
       { type: "image", src: "/photos/image-2.png" },
       { type: "image", src: "/photos/image-8.jpg" },
-      { type: "image", src: "/photos/image-4.png" },
       { type: "video", src: "/photos/video-4.mp4" },
       { type: "image", src: "/photos/image-5.png" },
+      { type: "image", src: "/photos/image-9.png" },
+      { type: "video", src: "/photos/video-5.mp4" },
+      { type: "image", src: "/photos/image-10.png" },
+      { type: "image", src: "/photos/image-11.png" },
       { type: "image", src: "/photos/image-7.jpg" },
       { type: "image", src: "/photos/image-6.png" },
     ],
@@ -82,7 +85,7 @@ export default function PhotosApp() {
 
     const ensureVideoPlay = (video: HTMLVideoElement) => {
       const playVideo = () => {
-        video.play().catch(() => {});
+        video.play().catch(() => { });
       };
 
       video.addEventListener("pause", playVideo);
