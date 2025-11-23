@@ -32,7 +32,7 @@ const ProjectLeQuiz: React.FC = () => {
     };
 
     return (
-        <div className="flex h-full w-full bg-white">
+        <div className="flex h-full w-full bg-white text-gray-700">
             <Sidebar
                 activeSection={activeSection}
                 activePage={activePage}

@@ -202,7 +202,7 @@ const SafariLauncher: React.FC<SafariLauncherProps> = ({
   };
 
   return (
-    <div className="relative h-full w-full -mt-2.5">
+    <div className="relative h-full w-full ">
       <Safari
         url={getUrl()}
         className="size-full"
@@ -235,7 +235,7 @@ const SafariLauncher: React.FC<SafariLauncherProps> = ({
               transition={{ duration: 0.4, ease: "easeOut" }}
               className="flex h-[100%] flex-col bg-[#f5f5f7] text-[#0d0d0d]"
             >
-              <header className="border-b border-black/5 bg-white/70 p-6 backdrop-blur-md">
+              <header className="border-b border-black/5 bg-white/70 px-6 py-3 backdrop-blur-md">
                 <p className="text-sm uppercase tracking-[0.4em] text-black/50">
                   Featured work
                 </p>
@@ -251,7 +251,7 @@ const SafariLauncher: React.FC<SafariLauncherProps> = ({
                   </div>
                   <Link href="https://github.com/zaazhafrnn" target="_blank">
                     <Button className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 hover:text-white shadow-sm cursor-pointer transition-all">
-                      Open Github ↗
+                      View Github ↗
                     </Button>
                   </Link>
                 </div>
