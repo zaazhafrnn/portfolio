@@ -8,18 +8,27 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
+import { usePhotosStore } from "@/stores/photosStore";
 
 export default function PhotosApp() {
-  const [rotation, setRotation] = useState(165);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [currentRotation, setCurrentRotation] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadedItems, setLoadedItems] = useState<Set<number>>(new Set());
-  const [errorItems, setErrorItems] = useState<Set<number>>(new Set());
-  const [hasAnimated, setHasAnimated] = useState(false);
+  const {
+    rotation,
+    isDragging,
+    startX,
+    currentRotation,
+    isLoading,
+    errorItems,
+    hasAnimated,
+    setRotation,
+    setIsDragging,
+    setStartX,
+    setCurrentRotation,
+    setIsLoading,
+    addLoadedItem,
+    addErrorItem,
+    setHasAnimated,
+  } = usePhotosStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const mediaItems = useMemo(
@@ -45,33 +54,44 @@ export default function PhotosApp() {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [setIsLoading]);
 
   useEffect(() => {
-    if (!isLoading && !hasAnimated) {
+    if (!isLoading && !hasAnimated && rotation === 165) {
       const animationTimer = setTimeout(() => {
-        setRotation((prev) => prev - 179);
+        setRotation(rotation - 179);
         setHasAnimated(true);
       }, 80);
       return () => clearTimeout(animationTimer);
+    } else if (!isLoading && !hasAnimated) {
+      setHasAnimated(true);
     }
-  }, [isLoading, hasAnimated]);
+  }, [isLoading, hasAnimated, rotation, setRotation, setHasAnimated]);
 
-  const handleMediaLoad = useCallback((index: number) => {
-    setLoadedItems((prev) => new Set([...prev, index]));
-  }, []);
+  const handleMediaLoad = useCallback(
+    (index: number) => {
+      addLoadedItem(index);
+    },
+    [addLoadedItem]
+  );
 
-  const handleMediaError = useCallback((index: number) => {
-    setErrorItems((prev) => new Set([...prev, index]));
-  }, []);
+  const handleMediaError = useCallback(
+    (index: number) => {
+      addErrorItem(index);
+    },
+    [addErrorItem]
+  );
 
   const allItemsErrored = errorItems.size === mediaItems.length;
 
-  const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-    setCurrentRotation(rotation);
-  };
+  const handleMouseDown = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      setIsDragging(true);
+      setStartX(e.clientX);
+      setCurrentRotation(rotation);
+    },
+    [rotation, setIsDragging, setStartX, setCurrentRotation]
+  );
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -80,24 +100,28 @@ export default function PhotosApp() {
       const rotationDelta = deltaX * 0.5;
       setRotation(currentRotation + rotationDelta);
     },
-    [isDragging, startX, currentRotation],
+    [isDragging, startX, currentRotation, setRotation],
   );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  }, []);
+  }, [setIsDragging]);
 
   const handleMouseLeave = useCallback(() => {
     setIsDragging(false);
-  }, []);
+  }, [setIsDragging]);
 
-  const handleWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    const targetRotation = rotation - delta * 0.9;
-    setRotation(targetRotation);
-  };
+  const handleWheel = useCallback(
+    (e: ReactWheelEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const delta =
+        Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      const targetRotation = rotation - delta * 0.5;
+      setRotation(targetRotation);
+    },
+    [rotation, setRotation]
+  );
 
   useEffect(() => {
     const videos = containerRef.current?.querySelectorAll("video");
@@ -182,7 +206,7 @@ export default function PhotosApp() {
                   transformOrigin: "50% 50%",
                   transition: isDragging
                     ? "none"
-                    : "transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    : "transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                 }}
               >
                 {mediaItems.map((item, index) => {
@@ -254,7 +278,7 @@ export default function PhotosApp() {
             Photos
           </span>
         </div>
-        <span>Drag and scroll to explore the carousel</span>
+        <span>Drag or scroll to explore the carousel</span>
       </div>
     </div>
   );

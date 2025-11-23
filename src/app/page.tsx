@@ -7,6 +7,7 @@ import {
   SystemInfoApp,
 } from "@/components/apps";
 import { useSafariStore } from "@/stores/safariStore";
+import { usePhotosStore } from "@/stores/photosStore";
 import DesktopBackground from "@/components/mac/DesktopBackground";
 import TopBar from "@/components/mac/TopBar";
 import WindowInstances from "@/components/mac/WindowInstances";
@@ -90,10 +91,19 @@ function MacOSDesktop() {
   }>({});
 
   const cleanupSafariStates = useSafariStore((state) => state.cleanupClosedWindows);
+  const resetPhotosStore = usePhotosStore((state) => state.reset);
+
   useEffect(() => {
     const openWindowIds = windows.map((w) => w.id);
     cleanupSafariStates(openWindowIds);
   }, [windows, cleanupSafariStates]);
+
+  useEffect(() => {
+    const hasPhotosWindow = windows.some((w) => w.appId === "photos");
+    if (!hasPhotosWindow) {
+      resetPhotosStore();
+    }
+  }, [windows, resetPhotosStore]);
 
   const handleToolbarLeftChange = useCallback((
     windowId: number,
@@ -183,8 +193,12 @@ function MacOSDesktop() {
       clearSafariState(windowId);
     }
 
+    if (appId === "photos") {
+      resetPhotosStore();
+    }
+
     reloadWindowFromManager(windowId, appId, title);
-  }, [windows, reloadWindowFromManager]);
+  }, [windows, reloadWindowFromManager, resetPhotosStore]);
 
   return (
     <div
