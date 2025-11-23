@@ -1,10 +1,10 @@
 "use client";
 import { Spinner } from "@/components/ui/spinner";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useState } from "react";
 
@@ -37,7 +37,7 @@ export default function SystemInfoApp() {
   useEffect(() => {
     const checkVideo = async () => {
       try {
-        const response = await fetch("/photos/video-3.mp4", { method: "HEAD" });
+        const response = await fetch("/photos/video-6.mp4", { method: "HEAD" });
         if (response.ok) {
           setIsLoading(false);
         } else {
@@ -78,8 +78,8 @@ export default function SystemInfoApp() {
         <div className="flex items-center justify-center">
           <div className="aspect-square w-full max-w-[180px] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-400">
             <video
-              src={"/photos/video-3.mp4"}
-              className="w-full h-full scale-120 right-0 object-cover rounded-full"
+              src={"/photos/video-6.mp4"}
+              className="w-full h-full scale-220 right-0 object-cover rounded-full"
               playsInline
               autoPlay
               loop
@@ -136,7 +136,7 @@ export default function SystemInfoApp() {
             />
             <InfoRow
               label="Collage"
-              value="Politeknik Perkapalan Negeri Surabaya"
+              value="Shipbuilding Institute of Polytechnic Surabaya"
             />
             <InfoRow label="Major" value="Automation Engineering" />
             <InfoRow label="Cohort" value="2025 (1st Year)" />
@@ -201,7 +201,7 @@ export default function SystemInfoApp() {
                       window.open("https://github.com/zaazhafrnn", "_blank")
                     }
                   >
-                    Simply Lovely...
+                    View GitHub...
                   </button>
                 </TooltipTrigger>
                 <TooltipContent

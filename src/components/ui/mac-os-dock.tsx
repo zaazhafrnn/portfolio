@@ -305,7 +305,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
 
             return (
               <ContextMenu key={app.id}>
-                <Tooltip>
+                <Tooltip delayDuration={400}>
                   <TooltipTrigger asChild>
                     <ContextMenuTrigger asChild>
                       <div

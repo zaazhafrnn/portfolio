@@ -49,17 +49,20 @@ const TrafficLights: FC<{
               e.stopPropagation();
               onClose(id);
             }}
-            className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer ${isFocused
+            className="py-1 px-0.25 cursor-pointer"
+          >
+            <div className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center ${isFocused
               ? "bg-red-500 hover:bg-red-600"
               : "bg-gray-300 hover:bg-gray-400"
               }`}
-          >
-            <X
-              className={`text-red-900 transition-opacity duration-300 ${isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
-                }`}
-              size={8}
-              strokeWidth={4}
-            />
+            >
+              <X
+                className={`text-red-900 transition-opacity duration-300 ${isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
+                  }`}
+                size={8}
+                strokeWidth={4}
+              />
+            </div>
           </button>
         </TooltipTrigger>
         <TooltipContent
@@ -79,17 +82,19 @@ const TrafficLights: FC<{
               e.stopPropagation();
               onMinimize(id);
             }}
-            className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer ${isFocused
+            className="py-1 px-0.25 cursor-pointer"
+          >
+            <div className={`w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center ${isFocused
               ? "bg-yellow-500 hover:bg-yellow-600"
               : "bg-gray-300 hover:bg-gray-400"
-              }`}
-          >
-            <Minus
-              className={`text-yellow-900 transition-opacity duration-300 ${isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
-                }`}
-              size={8}
-              strokeWidth={4}
-            />
+              }`}>
+              <Minus
+                className={`text-yellow-900 transition-opacity duration-300 ${isFocused ? "group-hover:opacity-100 opacity-0" : "opacity-0"
+                  }`}
+                size={8}
+                strokeWidth={4}
+              />
+            </div>
           </button>
         </TooltipTrigger>
         <TooltipContent
@@ -101,7 +106,9 @@ const TrafficLights: FC<{
       </Tooltip>
     </TooltipProvider>
 
-    <button className="w-3 h-3 bg-gray-300 rounded-full" />
+    <div className="py-1 px-0.25">
+      <div className="w-3 h-3 bg-gray-300 rounded-full" />
+    </div>
   </div>
 );
 

@@ -136,7 +136,7 @@ export default function WindowInstances({
                     <span
                       onClick={() =>
                         window.open(
-                          `https://mail.google.com/mail/?view=cm&fs=1&to=zaazhafrnn@gmail.com&su=Hai! I'm interested to hire you!"`,
+                          `https://mail.google.com/mail/?view=cm&fs=1&to=zaazhafrnn@gmail.com&su=Hai! I'm from your portfolio and interested to hire you!`,
                           "_blank",
                         )
                       }
