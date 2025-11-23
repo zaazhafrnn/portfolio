@@ -3,6 +3,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import {
   MouseEvent as ReactMouseEvent,
+  WheelEvent as ReactWheelEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -11,13 +12,14 @@ import {
 } from "react";
 
 export default function PhotosApp() {
-  const [rotation, setRotation] = useState(-16);
+  const [rotation, setRotation] = useState(165);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentRotation, setCurrentRotation] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedItems, setLoadedItems] = useState<Set<number>>(new Set());
   const [errorItems, setErrorItems] = useState<Set<number>>(new Set());
+  const [hasAnimated, setHasAnimated] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const mediaItems = useMemo(
@@ -42,9 +44,18 @@ export default function PhotosApp() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 100);
-
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !hasAnimated) {
+      const animationTimer = setTimeout(() => {
+        setRotation((prev) => prev - 179);
+        setHasAnimated(true);
+      }, 80);
+      return () => clearTimeout(animationTimer);
+    }
+  }, [isLoading, hasAnimated]);
 
   const handleMediaLoad = useCallback((index: number) => {
     setLoadedItems((prev) => new Set([...prev, index]));
@@ -80,19 +91,23 @@ export default function PhotosApp() {
     setIsDragging(false);
   }, []);
 
+  const handleWheel = (e: ReactWheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    const targetRotation = rotation - delta * 0.9;
+    setRotation(targetRotation);
+  };
+
   useEffect(() => {
     const videos = containerRef.current?.querySelectorAll("video");
-
     const ensureVideoPlay = (video: HTMLVideoElement) => {
       const playVideo = () => {
         video.play().catch(() => { });
       };
-
       video.addEventListener("pause", playVideo);
       video.addEventListener("loadeddata", playVideo);
-
       playVideo();
-
       return () => {
         video.removeEventListener("pause", playVideo);
         video.removeEventListener("loadeddata", playVideo);
@@ -100,7 +115,6 @@ export default function PhotosApp() {
     };
 
     const cleanupFunctions: (() => void)[] = [];
-
     videos?.forEach((video) => {
       const cleanup = ensureVideoPlay(video as HTMLVideoElement);
       if (cleanup) cleanupFunctions.push(cleanup);
@@ -113,15 +127,27 @@ export default function PhotosApp() {
 
   useEffect(() => {
     if (!isDragging) return;
-
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  useEffect(() => {
+    const preventNavigation = (e: WheelEvent) => {
+      if (containerRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("wheel", preventNavigation, { passive: false });
+
+    return () => {
+      document.removeEventListener("wheel", preventNavigation);
+    };
+  }, []);
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -146,13 +172,17 @@ export default function PhotosApp() {
               style={{ perspective: "1200px", width: "400px", height: "400px" }}
               onMouseDown={handleMouseDown}
               onMouseLeave={handleMouseLeave}
+              onWheel={handleWheel}
             >
               <div
-                className="relative w-full h-full transition-transform duration-100"
+                className="relative w-full h-full"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: `rotateY(${rotation}deg)`,
                   transformOrigin: "50% 50%",
+                  transition: isDragging
+                    ? "none"
+                    : "transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                 }}
               >
                 {mediaItems.map((item, index) => {
