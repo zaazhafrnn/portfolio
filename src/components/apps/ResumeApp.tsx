@@ -1,10 +1,10 @@
 "use client";
 import { Spinner } from "@/components/ui/spinner";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Download, Eye, ZoomIn, ZoomOut } from "lucide-react";
 import Image from "next/image";
@@ -26,6 +26,10 @@ export default function ResumeApp({
   const [error, setError] = useState<string | null>(null);
   const [lastModified, setLastModified] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
 
   const resumePath = "/folder/Resume.pdf";
   const resumePhotoPath = "/folder/resume@3x.jpg";
@@ -41,6 +45,32 @@ export default function ResumeApp({
 
   const resetZoom = () => {
     setZoom(100);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setScrollStart({
+      x: scrollContainerRef.current.scrollLeft,
+      y: scrollContainerRef.current.scrollTop,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    scrollContainerRef.current.scrollLeft = scrollStart.x - deltaX;
+    scrollContainerRef.current.scrollTop = scrollStart.y - deltaY;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
   };
 
   const toolbarLeft = (
@@ -216,6 +246,7 @@ export default function ResumeApp({
 
     checkPdfFile();
   }, []);
+
   return (
     <div
       className={`h-full flex flex-col bg-white ${className}`}
@@ -235,13 +266,22 @@ export default function ResumeApp({
             </div>
           </div>
         ) : (
-          <div className="h-full overflow-auto">
+          <div
+            ref={scrollContainerRef}
+            className="h-full overflow-auto"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          >
             <div className="w-max h-max p-4">
               <div
                 style={{
                   transform: `scale(${zoom / 98})`,
                   transformOrigin: "top left",
                   transition: "transform 0.2s ease-out",
+                  pointerEvents: 'none',
                 }}
               >
                 <Image
