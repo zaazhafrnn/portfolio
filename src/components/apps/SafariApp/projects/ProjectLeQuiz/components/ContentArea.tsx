@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import type { ActivePage } from "../types";
+import type { ActivePage, OverviewPage } from "../types";
 import { IntroductionPage } from "../pages/IntroductionPage";
 import { TechStackPage } from "../pages/TechStackPage";
 import { JoinClassPage } from "../pages/JoinClassPage";
@@ -13,9 +13,10 @@ import { AssignmentCreationPage } from "../pages/AssignmentCreationPage";
 
 interface ContentAreaProps {
     activePage: ActivePage;
+    onOverviewPageClick: (page: OverviewPage) => void;
 }
 
-export const ContentArea: React.FC<ContentAreaProps> = ({ activePage }) => {
+export const ContentArea: React.FC<ContentAreaProps> = ({ activePage, onOverviewPageClick }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const animationFrameRef = useRef<number | null>(null);
     const targetScrollRef = useRef<number>(0);
@@ -66,7 +67,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({ activePage }) => {
     const renderPage = () => {
         switch (activePage) {
             case "introduction":
-                return <IntroductionPage />;
+                return <IntroductionPage onTechStackClick={() => onOverviewPageClick("tech-stack")} />;
             case "tech-stack":
                 return <TechStackPage />;
             case "join-class":
@@ -82,7 +83,7 @@ export const ContentArea: React.FC<ContentAreaProps> = ({ activePage }) => {
             case "assignment-creation":
                 return <AssignmentCreationPage />;
             default:
-                return <IntroductionPage />;
+                return <IntroductionPage onTechStackClick={() => onOverviewPageClick("tech-stack")} />;
         }
     };
 

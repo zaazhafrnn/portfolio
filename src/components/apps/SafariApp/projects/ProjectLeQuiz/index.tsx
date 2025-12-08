@@ -40,7 +40,10 @@ const ProjectLeQuiz: React.FC = () => {
                 onStudentFeatureClick={handleStudentFeatureClick}
                 onTeacherFeatureClick={handleTeacherFeatureClick}
             />
-            <ContentArea activePage={activePage} />
+            <ContentArea
+                activePage={activePage}
+                onOverviewPageClick={handleOverviewPageClick}
+            />
         </div>
     );
 };
