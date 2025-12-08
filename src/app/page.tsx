@@ -13,6 +13,7 @@ import TopBar from "@/components/mac/TopBar";
 import WindowInstances from "@/components/mac/WindowInstances";
 import SplashScreen from "@/components/ui/SplashScreen";
 import { useWindowManager } from "@/hooks/useWindowManager";
+import { getResponsiveWindowSizes, getDeviceType } from "@/lib/device-utils";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 
@@ -68,6 +69,8 @@ export default function MacOSDesktopWrapper() {
 }
 
 function MacOSDesktop() {
+  const [deviceType, setDeviceType] = useState("desktop");
+  
   const {
     windows,
     openWindow,
@@ -82,6 +85,21 @@ function MacOSDesktop() {
     bouncingApps,
     stopBouncingForApp,
   } = useWindowManager();
+
+  useEffect(() => {
+    const updateDeviceType = () => {
+      setDeviceType(getDeviceType());
+    };
+    
+    updateDeviceType();
+    window.addEventListener("resize", updateDeviceType);
+    window.addEventListener("orientationchange", updateDeviceType);
+    
+    return () => {
+      window.removeEventListener("resize", updateDeviceType);
+      window.removeEventListener("orientationchange", updateDeviceType);
+    };
+  }, []);
 
   const [windowToolbarContent, setWindowToolbarContent] = useState<{
     [windowId: number]: {
@@ -200,11 +218,23 @@ function MacOSDesktop() {
     reloadWindowFromManager(windowId, appId, title);
   }, [windows, reloadWindowFromManager, resetPhotosStore]);
 
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (windows.some(w => !w.isMinimized)) {
+      e.preventDefault();
+    }
+    handleMouseMove(e as any);
+  }, [handleMouseMove, windows]);
+
   return (
     <div
       className="h-screen w-screen bg-gray-50 relative overflow-hidden select-none"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
+      style={{ 
+        touchAction: deviceType === "ipad" || deviceType === "tablet" ? "none" : "auto" 
+      }}
     >
       <DesktopBackground
         windows={windows}

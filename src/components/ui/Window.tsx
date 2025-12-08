@@ -6,8 +6,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Position } from "@/types";
+import { getResponsiveWindowSizes, isTouchDevice } from "@/lib/device-utils";
 import { Minus, X } from "lucide-react";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 interface WindowProps {
   id: number;
@@ -130,8 +131,15 @@ const Window: FC<WindowProps> = ({
   height,
   toolbarVariant = "default",
 }) => {
-  const w = width ?? DEFAULT_WIDTH;
-  const h = height ?? DEFAULT_HEIGHT;
+  const [isTouch, setIsTouch] = useState(false);
+  
+  useEffect(() => {
+    setIsTouch(isTouchDevice());
+  }, []);
+
+  const baseWidth = width ?? DEFAULT_WIDTH;
+  const baseHeight = height ?? DEFAULT_HEIGHT;
+  const { width: w, height: h } = getResponsiveWindowSizes(baseWidth, baseHeight);
 
   return (
     <div
@@ -147,8 +155,9 @@ const Window: FC<WindowProps> = ({
     >
       {toolbarVariant === "default" && (
         <div
-          className="h-8 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-3 cursor-grabbing"
+          className={`h-8 bg-gray-100 border-b border-gray-200 flex items-center justify-between px-3 ${isTouch ? 'cursor-grab touch-none' : 'cursor-grabbing'}`}
           onMouseDown={(e) => onMouseDown(e, id)}
+          onTouchStart={(e) => onMouseDown(e as any, id)}
         >
           <div className="flex items-center gap-2">
             {showDefaultButtons && (
@@ -176,13 +185,20 @@ const Window: FC<WindowProps> = ({
 
       {toolbarVariant === "transparent" && (
         <div
-          className="absolute top-0.5 left-0 right-0 h-8 flex items-center px-3 cursor-grabbing bg-transparent z-10"
+          className={`absolute top-0.5 left-0 right-0 h-8 flex items-center px-3 ${isTouch ? 'cursor-grab touch-none' : 'cursor-grabbing'} bg-transparent z-10`}
           onMouseDown={(e) => {
             const target = e.target as HTMLElement;
             if (target.closest('button, a, [role="button"]')) {
               return;
             }
             onMouseDown(e, id);
+          }}
+          onTouchStart={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('button, a, [role="button"]')) {
+              return;
+            }
+            onMouseDown(e as any, id);
           }}
         >
           <div className="flex items-center gap-2">
@@ -210,8 +226,9 @@ const Window: FC<WindowProps> = ({
 
       {toolbarVariant === "hidden" && (
         <div
-          className="absolute top-0 left-0 right-0 h-6 cursor-grab active:cursor-grabbing"
+          className={`absolute top-0 left-0 right-0 h-6 ${isTouch ? 'cursor-grab touch-none' : 'cursor-grab active:cursor-grabbing'}`}
           onMouseDown={(e) => onMouseDown(e, id)}
+          onTouchStart={(e) => onMouseDown(e as any, id)}
         />
       )}
 

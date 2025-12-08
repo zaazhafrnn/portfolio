@@ -1,5 +1,6 @@
 "use client";
 import type { DragState, MouseEventHandler, WindowData } from "@/types";
+import { isTouchDevice, getDeviceType, getResponsiveWindowSizes } from "@/lib/device-utils";
 import { useCallback, useState, useMemo } from "react";
 
 export const useWindowManager = () => {
@@ -44,6 +45,31 @@ export const useWindowManager = () => {
     );
   }, []);
 
+  const getInitialPosition = useCallback(() => {
+    const deviceType = getDeviceType();
+    const baseOffset = windows.length * 30;
+    
+    if (deviceType === "ipad" || deviceType === "tablet") {
+      const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
+      const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 768;
+      
+      return {
+        x: Math.max(20, (viewportWidth * 0.1) + baseOffset),
+        y: Math.max(60, (viewportHeight * 0.1) + baseOffset),
+      };
+    } else if (deviceType === "mobile") {
+      return {
+        x: 10 + baseOffset,
+        y: 50 + baseOffset,
+      };
+    }
+    
+    return {
+      x: 100 + baseOffset,
+      y: 100 + baseOffset,
+    };
+  }, [windows.length]);
+
   const openWindow = useCallback(
     (appId: string, title: string) => {
       const existingWindow = windows.find((w) => w.appId === appId);
@@ -56,15 +82,14 @@ export const useWindowManager = () => {
         return;
       }
 
+      const defaultSize = getResponsiveWindowSizes(600, 400);
+
       const newWindow: WindowData = {
         id: nextWindowId,
         appId,
         title,
-        position: {
-          x: 100 + windows.length * 30,
-          y: 100 + windows.length * 30,
-        },
-        size: { width: 600, height: 400 },
+        position: getInitialPosition(),
+        size: defaultSize,
         isMinimized: false,
         isBouncing: true,
         zIndex: 0,
@@ -74,7 +99,7 @@ export const useWindowManager = () => {
       setWindows(reindexWindows(updated));
       setNextWindowId((prev) => prev + 1);
     },
-    [windows, nextWindowId, bringToFront, minimizeWindow],
+    [windows, nextWindowId, bringToFront, minimizeWindow, getInitialPosition],
   );
 
   const closeWindow = useCallback(
@@ -90,11 +115,14 @@ export const useWindowManager = () => {
       const window = windows.find((w) => w.id === windowId);
       if (!window) return;
 
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
       setDragState({
         isDragging: windowId,
         offset: {
-          x: e.clientX - window.position.x,
-          y: e.clientY - window.position.y,
+          x: clientX - window.position.x,
+          y: clientY - window.position.y,
         },
       });
 
@@ -105,13 +133,21 @@ export const useWindowManager = () => {
   );
 
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent<Element>) => {
+    (e: React.MouseEvent<Element> | React.TouchEvent<Element>) => {
       if (dragState.isDragging === false) return;
       const window = windows.find((w) => w.id === dragState.isDragging);
       if (!window) return;
 
-      const newX = Math.max(0, e.clientX - dragState.offset.x);
-      const newY = Math.max(0, e.clientY - dragState.offset.y);
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+      const viewportWidth = typeof window !== "undefined" ? globalThis.window.innerWidth : 1024;
+      const viewportHeight = typeof window !== "undefined" ? globalThis.window.innerHeight : 768;
+      const windowWidth = window.size.width;
+      const windowHeight = window.size.height;
+      
+      const newX = Math.max(0, Math.min(viewportWidth - windowWidth, clientX - dragState.offset.x));
+      const newY = Math.max(0, Math.min(viewportHeight - windowHeight, clientY - dragState.offset.y));
 
       setWindows((prev) =>
         prev.map((w) =>

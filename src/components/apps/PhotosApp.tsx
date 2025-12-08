@@ -3,13 +3,16 @@ import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import {
   MouseEvent as ReactMouseEvent,
+  TouchEvent as ReactTouchEvent,
   WheelEvent as ReactWheelEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { usePhotosStore } from "@/stores/photosStore";
+import { isTouchDevice, getDeviceType } from "@/lib/device-utils";
 
 export default function PhotosApp() {
   const {
@@ -30,6 +33,49 @@ export default function PhotosApp() {
     setHasAnimated,
   } = usePhotosStore();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const getResponsiveDimensions = useCallback(() => {
+    if (typeof window === "undefined") return { size: 400, cardWidth: 192, cardHeight: 256 };
+    
+    const deviceType = getDeviceType();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    if (deviceType === "ipad" || deviceType === "tablet") {
+      const maxSize = Math.min(viewportWidth * 0.6, viewportHeight * 0.6, 450);
+      return {
+        size: maxSize,
+        cardWidth: Math.max(160, maxSize * 0.4),
+        cardHeight: Math.max(200, maxSize * 0.55)
+      };
+    } else if (deviceType === "mobile") {
+      const maxSize = Math.min(viewportWidth * 0.8, viewportHeight * 0.5, 320);
+      return {
+        size: maxSize,
+        cardWidth: Math.max(120, maxSize * 0.4),
+        cardHeight: Math.max(160, maxSize * 0.55)
+      };
+    }
+    
+    return { size: 400, cardWidth: 192, cardHeight: 256 };
+  }, []);
+
+  const [dimensions, setDimensions] = useState(() => getResponsiveDimensions());
+  const { size, cardWidth, cardHeight } = dimensions;
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions(getResponsiveDimensions());
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [getResponsiveDimensions]);
 
   const mediaItems = useMemo(
     () => [
@@ -93,6 +139,16 @@ export default function PhotosApp() {
     [rotation, setIsDragging, setStartX, setCurrentRotation]
   );
 
+  const handleTouchStart = useCallback(
+    (e: ReactTouchEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(true);
+      setStartX(e.touches[0].clientX);
+      setCurrentRotation(rotation);
+    },
+    [rotation, setIsDragging, setStartX, setCurrentRotation]
+  );
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging) return;
@@ -103,7 +159,22 @@ export default function PhotosApp() {
     [isDragging, startX, currentRotation, setRotation],
   );
 
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const deltaX = e.touches[0].clientX - startX;
+      const rotationDelta = deltaX * 0.5;
+      setRotation(currentRotation + rotationDelta);
+    },
+    [isDragging, startX, currentRotation, setRotation],
+  );
+
   const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, [setIsDragging]);
+
+  const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
   }, [setIsDragging]);
 
@@ -151,13 +222,19 @@ export default function PhotosApp() {
 
   useEffect(() => {
     if (!isDragging) return;
+    
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd);
+    
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   useEffect(() => {
     const preventNavigation = (e: WheelEvent) => {
@@ -192,10 +269,16 @@ export default function PhotosApp() {
           <div className="h-full flex items-center justify-center p-6">
             <div
               ref={containerRef}
-              className="cursor-grab active:cursor-grabbing"
-              style={{ perspective: "1200px", width: "400px", height: "400px" }}
+              className="cursor-grab active:cursor-grabbing touch-none"
+              style={{ 
+                perspective: "1200px", 
+                width: `${size}px`, 
+                height: `${size}px`,
+                touchAction: "none"
+              }}
               onMouseDown={handleMouseDown}
               onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
               onWheel={handleWheel}
             >
               <div
@@ -211,14 +294,16 @@ export default function PhotosApp() {
               >
                 {mediaItems.map((item, index) => {
                   const angle = (360 / mediaItems.length) * index;
-                  const translateZ = 115;
+                  const translateZ = Math.max(115, size * 0.28);
                   return (
                     <div
                       key={index}
-                      className="absolute w-48 h-64 rounded-xl overflow-hidden"
+                      className="absolute rounded-xl overflow-hidden"
                       style={{
                         left: "50%",
                         top: "50%",
+                        width: `${cardWidth}px`,
+                        height: `${cardHeight}px`,
                         transform: `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${translateZ}px) rotateY(270deg)`,
                         transformStyle: "preserve-3d",
                       }}
@@ -229,8 +314,8 @@ export default function PhotosApp() {
                           alt={`Media ${index + 1}`}
                           className="w-full h-full object-cover"
                           draggable={false}
-                          width={208}
-                          height={208}
+                          width={cardWidth}
+                          height={cardHeight}
                           onLoad={() => handleMediaLoad(index)}
                           onError={() => handleMediaError(index)}
                         />
@@ -278,7 +363,7 @@ export default function PhotosApp() {
             Photos
           </span>
         </div>
-        <span>Drag or scroll to explore the carousel</span>
+        <span>{isTouchDevice() ? "Touch and drag to explore the carousel" : "Drag or scroll to explore the carousel"}</span>
       </div>
     </div>
   );

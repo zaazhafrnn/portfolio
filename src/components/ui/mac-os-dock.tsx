@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { shouldUseDockZoom } from "@/lib/device-utils";
 import { WindowData } from "@/types";
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -51,6 +52,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
     apps.map(() => 1),
   );
   const [currentPositions, setCurrentPositions] = useState<number[]>([]);
+  const [enableZoom, setEnableZoom] = useState(true);
   const dockRef = useRef<HTMLDivElement>(null);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -98,7 +100,10 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
   useEffect(() => {
     const handleResize = () => {
       setConfig(getResponsiveConfig());
+      setEnableZoom(shouldUseDockZoom());
     };
+
+    setEnableZoom(shouldUseDockZoom());
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -106,7 +111,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
 
   const calculateTargetMagnification = useCallback(
     (mousePosition: number | null) => {
-      if (mousePosition === null) {
+      if (!enableZoom || mousePosition === null) {
         return apps.map(() => minScale);
       }
 
@@ -127,7 +132,7 @@ const MacOSDock: React.FC<MacOSDockProps> = ({
         return minScale + scaleFactor * (maxScale - minScale);
       });
     },
-    [apps, baseIconSize, baseSpacing, effectWidth, maxScale, minScale],
+    [apps, baseIconSize, baseSpacing, effectWidth, maxScale, minScale, enableZoom],
   );
 
   const calculatePositions = useCallback(
