@@ -25,20 +25,25 @@ const MacOSDock = dynamic(
 
 const apps = [
   { id: "finder", name: "Finder", icon: "/icons/finder.png" },
+  { id: "maps", name: "Maps", icon: "/icons/maps.png" },
   { id: "photos", name: "Photo Dumps", icon: "/icons/photos.png" },
   { id: "resume", name: "Resume.pdf", icon: "/icons/docs.png" },
+  { id: "facetime", name: "FaceTime", icon: "/icons/facetime.png" },
   { id: "systemInfo", name: "System Information", icon: "/icons/settings.png" },
   {
     id: "safari",
     name: "Safari",
     icon: "/icons/safari.png",
   },
+  { id: "notes", name: "Notes", icon: "/icons/notes.png" },
   {
     id: "atmProject",
     name: "Portfolio (ATM Simulator)",
     icon: "/icons/folder.png",
   },
-  { id: "folder", name: "Documents", icon: "/icons/weather.png" },
+  { id: "spotify", name: "Spotify", icon: "/icons/spotify.png" },
+  { id: "weather", name: "Weather", icon: "/icons/weather.png" },
+  { id: "trash", name: "Trash", icon: "/icons/trash.png" },
 ];
 
 const WINDOW_SIZES: Record<string, { width: number; height: number }> = {
@@ -70,9 +75,9 @@ export default function MacOSDesktopWrapper() {
 
   const handleSplashFinish = () => {
     setShowSplash(false);
-    
+
     sessionStorage.setItem("hasSeenSplash", "true");
-    
+
     const hasSeenFullscreenPrompt = sessionStorage.getItem("hasSeenFullscreenPrompt");
     if (!hasSeenFullscreenPrompt && !document.fullscreenElement) {
       setTimeout(() => {
@@ -110,7 +115,7 @@ export default function MacOSDesktopWrapper() {
 
 function MacOSDesktop() {
   const [deviceType, setDeviceType] = useState("desktop");
-  
+
   const {
     windows,
     openWindow,
@@ -130,11 +135,11 @@ function MacOSDesktop() {
     const updateDeviceType = () => {
       setDeviceType(getDeviceType());
     };
-    
+
     updateDeviceType();
     window.addEventListener("resize", updateDeviceType);
     window.addEventListener("orientationchange", updateDeviceType);
-    
+
     return () => {
       window.removeEventListener("resize", updateDeviceType);
       window.removeEventListener("orientationchange", updateDeviceType);
@@ -218,7 +223,8 @@ function MacOSDesktop() {
       default:
         return (
           <div className="p-6 h-full flex items-center justify-center">
-            <p className="text-gray-500">Content for {appId}</p>
+            <p className="text-gray-500 text-center">We're really sorry, the <strong>{appId}</strong> app is currently still in development.
+              Please check back in a few days.</p>
           </div>
         );
     }
@@ -272,8 +278,8 @@ function MacOSDesktop() {
       onMouseUp={handleMouseUp}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleMouseUp}
-      style={{ 
-        touchAction: deviceType === "ipad" || deviceType === "tablet" ? "none" : "auto" 
+      style={{
+        touchAction: deviceType === "ipad" || deviceType === "tablet" ? "none" : "auto"
       }}
     >
       <DesktopBackground

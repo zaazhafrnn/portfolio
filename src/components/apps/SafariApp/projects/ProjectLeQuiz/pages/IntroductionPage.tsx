@@ -149,8 +149,8 @@ export const IntroductionPage = ({ onTechStackClick }: IntroductionPageProps) =>
           collaboration and shared vision.
         </p>
 
-        <h1 className="text-black text-xl mb-2 font-semibold pt-4 tracking-tight">Quick Look</h1>
-        <div className="w-full flex gap-4 mt-6 h-[600px]">
+        {/* <h1 className="text-black text-xl mb-2 font-semibold pt-4 tracking-tight">Quick Look</h1> */}
+        {/* <div className="w-full flex gap-4 mt-6 h-[600px]">
           <div className="flex-[3] h-full">
             <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden border-2 border-black shadow-lg">
               <Image
@@ -184,7 +184,7 @@ export const IntroductionPage = ({ onTechStackClick }: IntroductionPageProps) =>
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

@@ -18,14 +18,6 @@ export const SAFARI_PROJECTS: Record<
     documentationStyle?: boolean;
   }
 > = {
-  projectBankingApp: {
-    name: "Project Banking System",
-    subtitle: "School Project",
-    url: "https://github.com/zaazhafrnn/ATM-System.git",
-    status: "ready",
-    summary:
-      "Written in Java, PHP, with MySQL for database. Integrating between 2 platform Java GUI (Desktop) & Web.",
-  },
   projectLeQuiz: {
     name: "Le Quiz",
     subtitle: "Interactive Quiz Platform",
@@ -34,6 +26,14 @@ export const SAFARI_PROJECTS: Record<
     summary:
       "An interactive quiz platform similar to a Learning Management System, designed for seamless cross-device experiences between mobile and web.",
     documentationStyle: true,
+  },
+  projectBankingApp: {
+    name: "Project Banking System",
+    subtitle: "School Project",
+    url: "https://github.com/zaazhafrnn/ATM-System.git",
+    status: "coming-soon",
+    summary:
+      "Written in Java, PHP, with MySQL for database. Integrating between 2 platform Java GUI (Desktop) & Web.",
   },
   projectB: {
     name: "AI Workflow Studio",
