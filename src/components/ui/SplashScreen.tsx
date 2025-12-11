@@ -163,7 +163,7 @@ export default function SplashScreen({
                 Apple Inc.
               </span>
               <span
-                className={`absolute inset-0 flex items-center -translate-x-7 justify-center transition-opacity duration-500 ${
+                className={`absolute inset-0 flex items-center -translate-x-7 translate-y-0.5 justify-center transition-opacity duration-500 ${
                   phase === "logo" ? "opacity-100" : "opacity-0"
                 }`}
               >

@@ -31,6 +31,7 @@ export default function TopBar() {
 
   const handleRestart = () => {
     sessionStorage.removeItem("hasSeenSplash");
+    sessionStorage.removeItem("hasSeenFullscreenPrompt");
     window.location.reload();
   };
 

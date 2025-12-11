@@ -27,6 +27,7 @@ export default function DesktopBackground({
 }) {
   const handleResetSplashScreen = () => {
     sessionStorage.removeItem("hasSeenSplash");
+    sessionStorage.removeItem("hasSeenFullscreenPrompt");
     window.location.reload();
   };
 

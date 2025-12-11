@@ -12,6 +12,7 @@ import DesktopBackground from "@/components/mac/DesktopBackground";
 import TopBar from "@/components/mac/TopBar";
 import WindowInstances from "@/components/mac/WindowInstances";
 import SplashScreen from "@/components/ui/SplashScreen";
+import FullscreenPrompt from "@/components/ui/FullscreenPrompt";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import { getResponsiveWindowSizes, getDeviceType } from "@/lib/device-utils";
 import dynamic from "next/dynamic";
@@ -51,21 +52,60 @@ const WINDOW_SIZES: Record<string, { width: number; height: number }> = {
 
 export default function MacOSDesktopWrapper() {
   const [showSplash, setShowSplash] = useState(false);
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
 
   useEffect(() => {
     const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
+    const hasSeenFullscreenPrompt = sessionStorage.getItem("hasSeenFullscreenPrompt");
 
     if (!hasSeenSplash) {
       setShowSplash(true);
-      sessionStorage.setItem("hasSeenSplash", "true");
+    } else if (!hasSeenFullscreenPrompt && !document.fullscreenElement) {
+      const timer = setTimeout(() => {
+        setShowFullscreenPrompt(true);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, []);
 
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    
+    sessionStorage.setItem("hasSeenSplash", "true");
+    
+    const hasSeenFullscreenPrompt = sessionStorage.getItem("hasSeenFullscreenPrompt");
+    if (!hasSeenFullscreenPrompt && !document.fullscreenElement) {
+      setTimeout(() => {
+        setShowFullscreenPrompt(true);
+      }, 3000);
+    }
+  };
+
+  const handleFullscreenPromptDismiss = () => {
+    setShowFullscreenPrompt(false);
+    sessionStorage.setItem("hasSeenFullscreenPrompt", "true");
+  };
+
+  const handleEnterFullscreen = () => {
+    setShowFullscreenPrompt(false);
+    localStorage.setItem("hasSeenFullscreenPrompt", "true");
+  };
+
   if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+    return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
-  return <MacOSDesktop />;
+  return (
+    <>
+      <MacOSDesktop />
+      {showFullscreenPrompt && (
+        <FullscreenPrompt
+          onDismiss={handleFullscreenPromptDismiss}
+          onEnterFullscreen={handleEnterFullscreen}
+        />
+      )}
+    </>
+  );
 }
 
 function MacOSDesktop() {
@@ -182,7 +222,7 @@ function MacOSDesktop() {
           </div>
         );
     }
-  }, [handleToolbarLeftChange, handleToolbarRightChange, createToolbarCallback]);
+  }, [handleToolbarLeftChange, handleToolbarRightChange, createToolbarCallback, stopBouncingForApp]);
 
   const openAppIds = windows.map((w) => w.appId);
 
