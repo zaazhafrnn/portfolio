@@ -13,6 +13,7 @@ import TopBar from "@/components/mac/TopBar";
 import WindowInstances from "@/components/mac/WindowInstances";
 import SplashScreen from "@/components/ui/SplashScreen";
 import FullscreenPrompt from "@/components/ui/FullscreenPrompt";
+import MobilePreventionScreen from "@/components/ui/MobilePreventionScreen";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import { getResponsiveWindowSizes, getDeviceType } from "@/lib/device-utils";
 import dynamic from "next/dynamic";
@@ -58,8 +59,18 @@ const WINDOW_SIZES: Record<string, { width: number; height: number }> = {
 export default function MacOSDesktopWrapper() {
   const [showSplash, setShowSplash] = useState(false);
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
+  const [deviceType, setDeviceType] = useState<string | null>(null);
 
   useEffect(() => {
+    // First check device type
+    const currentDeviceType = getDeviceType();
+    setDeviceType(currentDeviceType);
+
+    // If mobile device, don't proceed with splash or other functionality
+    if (currentDeviceType === "mobile") {
+      return;
+    }
+
     const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
     const hasSeenFullscreenPrompt = sessionStorage.getItem("hasSeenFullscreenPrompt");
 
@@ -95,6 +106,20 @@ export default function MacOSDesktopWrapper() {
     setShowFullscreenPrompt(false);
     localStorage.setItem("hasSeenFullscreenPrompt", "true");
   };
+
+  // Show mobile prevention screen for mobile devices
+  if (deviceType === "mobile") {
+    return <MobilePreventionScreen />;
+  }
+
+  // Show loading state while device type is being determined
+  if (deviceType === null) {
+    return (
+      <div className="h-screen w-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
