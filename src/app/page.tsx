@@ -15,7 +15,7 @@ import SplashScreen from "@/components/ui/SplashScreen";
 import FullscreenPrompt from "@/components/ui/FullscreenPrompt";
 import MobilePreventionScreen from "@/components/ui/MobilePreventionScreen";
 import { useWindowManager } from "@/hooks/useWindowManager";
-import { getResponsiveWindowSizes, getDeviceType } from "@/lib/device-utils";
+import { getDeviceType } from "@/lib/device-utils";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 
@@ -248,7 +248,7 @@ function MacOSDesktop() {
       default:
         return (
           <div className="p-6 h-full flex items-center justify-center">
-            <p className="text-gray-500 text-center">We're really sorry, the <strong>{appId}</strong> app is currently still in development.
+            <p className="text-gray-500 text-center">We&apos;re really sorry, the <strong>{appId}</strong> app is currently still in development.
               Please check back in a few days.</p>
           </div>
         );

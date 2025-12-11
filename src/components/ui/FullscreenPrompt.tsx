@@ -97,7 +97,7 @@ export default function FullscreenPrompt({ onDismiss, onEnterFullscreen }: Fulls
               onClick={handleDismiss}
               className="w-full mt-1.5 py-2 text-sm cursor-pointer font-medium text-gray-700 rounded-lg transition-all duration-150 hover:brightness-90 active:scale-[0.98] bg-[#d0d0d0] shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.3)]"
             >
-              Understand, I'll enter fullscreen later
+              Understand, I&apos;ll enter fullscreen later
             </button>
           </div>
         </div>

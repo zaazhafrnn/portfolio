@@ -110,8 +110,8 @@ export const useWindowManager = () => {
     [windows],
   );
 
-  const handleMouseDown: MouseEventHandler = useCallback(
-    (e, windowId) => {
+  const handleMouseDown = useCallback(
+    (e: any, windowId: number) => {
       const window = windows.find((w) => w.id === windowId);
       if (!window) return;
 

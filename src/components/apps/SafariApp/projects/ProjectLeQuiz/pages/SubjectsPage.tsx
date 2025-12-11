@@ -5,7 +5,7 @@ export const SubjectsPage = () => {
         <h2 className="mb-4 text-3xl font-bold tracking-tight">Subjects</h2>
         <div className="space-y-4 text-muted-foreground">
           <p>
-            View all subjects available in the classes they've joined.
+            View all subjects available in the classes they&apos;ve joined.
             Students can navigate through different subjects to access
             relevant assignments and course content.
           </p>

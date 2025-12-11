@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function MobilePreventionScreen() {
   const [mounted, setMounted] = useState(false);
@@ -16,7 +17,7 @@ export default function MobilePreventionScreen() {
     <div className="fixed inset-0 bg-black flex items-center justify-center z-[9999] p-6">
       <div className="text-center max-w-md">
         <div className="mb-8">
-          <img
+          <Image
             src="/icons/finder.png"
             alt="Finder Icon"
             width={70}
@@ -37,7 +38,7 @@ export default function MobilePreventionScreen() {
 
         <div className="flex items-center justify-center space-x-6 text-gray-500 mb-8">
           <div className="flex flex-col items-center">
-            <img
+            <Image
               src="/icons/safari.png"
               alt="Safari Icon"
               width={32}
@@ -48,7 +49,7 @@ export default function MobilePreventionScreen() {
             <span className="text-xs">Safari</span>
           </div>
           <div className="flex flex-col items-center">
-            <img
+            <Image
               src="/icons/docs.png"
               alt="Docs Icon"
               width={32}
@@ -59,7 +60,7 @@ export default function MobilePreventionScreen() {
             <span className="text-xs">Resume</span>
           </div>
           <div className="flex flex-col items-center">
-            <img
+            <Image
               src="/icons/folder.png"
               alt="Portfolio Icon"
               width={32}

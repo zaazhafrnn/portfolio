@@ -17,7 +17,7 @@ interface TechIconProps {
   alt: string;
   size?: number;
   containerSize?: number;
-  className?: String;
+  className?: string;
 }
 
 const TechIcon = ({ src, alt, className, size = 20, containerSize }: TechIconProps) => {
