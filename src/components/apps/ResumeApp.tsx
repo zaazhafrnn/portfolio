@@ -23,6 +23,7 @@ export default function ResumeApp({
 }: ResumeAppProps) {
   const [zoom, setZoom] = useState(100);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastModified, setLastModified] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,7 @@ export default function ResumeApp({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
+  const [imageError, setImageError] = useState(false);
 
   const resumePath = "/folder/Resume.pdf";
   const resumePhotoPath = "/folder/resume@3x.jpg";
@@ -207,9 +209,14 @@ export default function ResumeApp({
   useEffect(() => {
     const checkPdfFile = async () => {
       try {
-        const response = await fetch(resumePhotoPath, { method: "HEAD" });
-        if (response.ok) {
-          const lastMod = response.headers.get("last-modified");
+        // Check both PDF and image availability
+        const [pdfResponse, imageResponse] = await Promise.all([
+          fetch(resumePath, { method: "HEAD" }),
+          fetch(resumePhotoPath, { method: "HEAD" })
+        ]);
+        
+        if (pdfResponse.ok && imageResponse.ok) {
+          const lastMod = pdfResponse.headers.get("last-modified") || imageResponse.headers.get("last-modified");
           if (lastMod) {
             const date = new Date(lastMod);
             const now = new Date();
@@ -234,18 +241,36 @@ export default function ResumeApp({
 
           setIsLoading(false);
         } else {
-          throw new Error("PDF not found");
+          throw new Error("Resume files not found");
         }
       } catch (err) {
-        setError(
-          "Unable to load Resume.",
-        );
+        setError("Unable to load Resume.");
         setIsLoading(false);
       }
     };
 
     checkPdfFile();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && imageLoading) {
+      const timeout = setTimeout(() => {
+        setImageLoading(false);
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, imageLoading]);
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+    setImageError(true);
+  };
 
   return (
     <div
@@ -255,7 +280,10 @@ export default function ResumeApp({
       <div className="flex-1 relative overflow-hidden bg-gray-100">
         {isLoading ? (
           <div className="h-full flex items-center justify-center">
-            <Spinner />
+            <div className="flex flex-col items-center space-y-4">
+              <Spinner />
+              <div className="text-gray-500 text-sm">Initializing resume viewer...</div>
+            </div>
           </div>
         ) : error ? (
           <div className="h-full flex items-center justify-center">
@@ -284,13 +312,48 @@ export default function ResumeApp({
                   pointerEvents: 'none',
                 }}
               >
-                <Image
-                  src="/folder/resume@3x.jpg"
-                  alt="Resume"
-                  width={2000}
-                  height={2000}
-                  className="shadow-2xl rounded-lg w-[600px] h-auto"
-                />
+                <div className="relative w-[600px] h-auto">
+                  {imageLoading && !imageError && (
+                    <div className="w-[600px] h-[800px] shadow-2xl rounded-lg bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse flex items-center justify-center">
+                      <div className="flex flex-col items-center space-y-4">
+                        <Spinner />
+                        <div className="text-gray-500 text-sm font-medium">Loading resume...</div>
+                      </div>
+                    </div>
+                  )}
+                  {imageError ? (
+                    <div className="w-[600px] h-[800px] bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg shadow-2xl flex flex-col items-center justify-center">
+                      <div className="text-gray-500 text-center p-8">
+                        <div className="text-4xl mb-4">📄</div>
+                        <h3 className="text-lg font-medium mb-2">Resume Preview Unavailable</h3>
+                        <p className="text-sm text-gray-400 mb-4">The image couldn't load, but you can still view or download the PDF.</p>
+                        <button
+                          onClick={() => window.open(resumePath, "_blank")}
+                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                          Open PDF Instead
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Image
+                      src="/folder/resume@3x.jpg"
+                      alt="Resume"
+                      width={600}
+                      height={800}
+                      className={`shadow-2xl rounded-lg transition-opacity duration-500 ${
+                        imageLoading ? 'opacity-0' : 'opacity-100'
+                      }`}
+                      style={{ width: '600px', height: 'auto' }}
+                      priority
+                      quality={85}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+eq/wDVMwP0W4E8Rh7lEu/RWcNF4E0v/2Q=="
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

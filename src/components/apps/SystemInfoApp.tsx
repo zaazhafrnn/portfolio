@@ -6,11 +6,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 export default function SystemInfoApp() {
   const [isLoading, setIsLoading] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const version = useMemo(() => {
     const birthDate = new Date(2007, 5, 18);
@@ -46,11 +48,28 @@ export default function SystemInfoApp() {
       } catch (err) {
         setError("Unable to load system information");
         setIsLoading(false);
+        setVideoLoading(false);
       }
     };
 
     checkVideo();
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setVideoLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleVideoLoad = () => {
+    setVideoLoading(false);
+  };
+
+  const handleVideoError = () => {
+    setVideoLoading(false);
+  };
 
   if (isLoading) {
     return (
@@ -76,14 +95,31 @@ export default function SystemInfoApp() {
     <div className="bg-neutral-50 w-full h-full flex flex-col">
       <div className="grid grid-cols-3 p-8">
         <div className="flex items-center justify-center">
-          <div className="aspect-square w-full max-w-[180px] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-400">
+          <div className="aspect-square w-full max-w-[180px] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-400 relative">
+            <div 
+              className={`absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 animate-pulse transition-opacity duration-500 ${
+                videoLoading ? 'opacity-100' : 'opacity-0'
+              }`}
+            ></div>
+            
             <video
+              ref={videoRef}
               src={"/photos/video-6.mp4"}
-              className="w-full h-full scale-220 right-0 object-cover rounded-full"
+              className={`w-full h-full scale-220 right-0 object-cover rounded-full transition-opacity duration-500 ${
+                videoLoading ? 'opacity-0' : 'opacity-100'
+              }`}
               playsInline
               autoPlay
               loop
               muted
+              onCanPlay={handleVideoLoad}
+              onTimeUpdate={() => {
+                if (videoRef.current && !videoRef.current.paused) {
+                  setVideoLoading(false);
+                }
+              }}
+              onError={handleVideoError}
+              preload="auto"
             />
           </div>
         </div>

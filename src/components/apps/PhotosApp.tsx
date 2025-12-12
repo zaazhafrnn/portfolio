@@ -1,5 +1,7 @@
 "use client";
 import { Spinner } from "@/components/ui/spinner";
+import { ImageSkeletonCard } from "@/components/ui/ImageSkeleton";
+import { useImagePreloader } from "@/components/ui/ImagePreloader";
 import Image from "next/image";
 import {
   MouseEvent as ReactMouseEvent,
@@ -33,6 +35,8 @@ export default function PhotosApp() {
     setHasAnimated,
   } = usePhotosStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [loadedItems, setLoadedItems] = useState<Set<number>>(new Set());
+  const [imageLoadingStates, setImageLoadingStates] = useState<Record<number, 'loading' | 'loaded' | 'error'>>({});
 
   const getResponsiveDimensions = useCallback(() => {
     if (typeof window === "undefined") return { size: 400, cardWidth: 192, cardHeight: 256 };
@@ -95,6 +99,13 @@ export default function PhotosApp() {
     [],
   );
 
+  const imageUrls = useMemo(
+    () => mediaItems.filter(item => item.type === "image").map(item => item.src),
+    [mediaItems]
+  );
+
+  const { isLoading: isPreloading, progress: preloadProgress } = useImagePreloader(imageUrls);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -117,6 +128,8 @@ export default function PhotosApp() {
   const handleMediaLoad = useCallback(
     (index: number) => {
       addLoadedItem(index);
+      setLoadedItems(prev => new Set([...prev, index]));
+      setImageLoadingStates(prev => ({ ...prev, [index]: 'loaded' }));
     },
     [addLoadedItem]
   );
@@ -124,9 +137,14 @@ export default function PhotosApp() {
   const handleMediaError = useCallback(
     (index: number) => {
       addErrorItem(index);
+      setImageLoadingStates(prev => ({ ...prev, [index]: 'error' }));
     },
     [addErrorItem]
   );
+
+  const handleImageLoadStart = useCallback((index: number) => {
+    setImageLoadingStates(prev => ({ ...prev, [index]: 'loading' }));
+  }, []);
 
   const allItemsErrored = errorItems.size === mediaItems.length;
 
@@ -253,9 +271,18 @@ export default function PhotosApp() {
   return (
     <div className="h-full flex flex-col bg-white">
       <div className="flex-1 relative overflow-hidden bg-gray-100">
-        {isLoading ? (
+        {isLoading || isPreloading ? (
           <div className="h-full flex items-center justify-center">
-            <Spinner />
+            <div className="flex flex-col items-center justify-center text-center">
+              <Spinner />
+              <div className="mt-4 text-sm text-gray-500 flex items-center justify-center">
+                {isPreloading ? (
+                  <>Loading photos...</>
+                ) : (
+                  "Preparing gallery..."
+                )}
+              </div>
+            </div>
           </div>
         ) : allItemsErrored ? (
           <div className="h-full flex items-center justify-center">
@@ -309,16 +336,37 @@ export default function PhotosApp() {
                       }}
                     >
                       {item.type === "image" ? (
-                        <Image
-                          src={item.src}
-                          alt={`Media ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          draggable={false}
-                          width={cardWidth}
-                          height={cardHeight}
-                          onLoad={() => handleMediaLoad(index)}
-                          onError={() => handleMediaError(index)}
-                        />
+                        <div className="relative w-full h-full">
+                          {imageLoadingStates[index] !== 'loaded' && (
+                            <ImageSkeletonCard
+                              width={cardWidth}
+                              height={cardHeight}
+                              className="absolute inset-0"
+                            />
+                          )}
+                          <Image
+                            src={item.src}
+                            alt={`Media ${index + 1}`}
+                            className={`w-full h-full object-cover transition-opacity duration-500 ${
+                              imageLoadingStates[index] === 'loaded' ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            draggable={false}
+                            width={cardWidth}
+                            height={cardHeight}
+                            priority={index < 3}
+                            loading={index < 3 ? "eager" : "lazy"}
+                            onLoadStart={() => handleImageLoadStart(index)}
+                            onLoad={() => handleMediaLoad(index)}
+                            onError={() => handleMediaError(index)}
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+eq/wDVMwP0W4E8Rh7lEu/RWcNF4E0v/2Q=="
+                          />
+                          {imageLoadingStates[index] === 'error' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 text-gray-500 text-xs">
+                              Failed to load
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <video
                           src={item.src}

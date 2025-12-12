@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <h3 className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                 Features
                             </h3>
-                            <Accordion type="multiple" defaultValue={["student"]} className="w-full">
+                            <Accordion type="multiple" defaultValue={["student","teacher"]} className="w-full">
                                 <AccordionItem value="student" className="border-0">
                                     <AccordionTrigger
                                         className={cn(
